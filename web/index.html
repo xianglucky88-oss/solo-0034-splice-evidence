@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>纤证 · 接续损耗交接台</title>
+  <link rel="stylesheet" href="/assets/app.css">
+  <script type="module" src="/assets/app.mjs"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">纤</span><span>纤证<span class="brand-detail">接续损耗交接台</span></span></div>
+    <div class="header-actions">
+      <label class="span-control">光段 <select id="span" aria-label="选择光段"></select></label>
+      <button id="demo" type="button">导入演示</button>
+      <button id="new-plan" type="button">登记光段</button>
+    </div>
+  </header>
+  <main>
+    <div id="flash" role="status" aria-live="polite"></div>
+    <section id="empty" class="empty" hidden>
+      <p class="eyebrow">工作台</p><h1>建立光段验收计划</h1>
+      <p>登记接续点的设计里程与损耗限值，或导入演示查看双端证据。</p>
+    </section>
+    <div id="workspace" hidden>
+      <section class="heading">
+        <div>
+          <p id="span-code" class="eyebrow"></p>
+          <h1 id="title"></h1>
+          <p id="endpoints" class="muted"></p>
+        </div>
+        <div class="heading-actions">
+          <span id="release-status" class="status"></span>
+          <button id="import-trace" type="button">导入仪表凭证</button>
+          <button id="issue" type="button" class="primary">签发当前修订</button>
+        </div>
+      </section>
+      <section class="metrics" aria-label="光段损耗核算" id="metrics"></section>
+      <div class="workgrid">
+        <section class="panel alignment">
+          <header class="panel-head"><div><h2>双端里程对照</h2><p id="revision-note" class="muted"></p></div>
+            <button id="live" type="button" hidden>返回当前修订</button></header>
+          <div class="legend" aria-hidden="true"><span>设计接续点</span><span>甲端事件</span><span>乙端事件</span></div>
+          <canvas id="ruler" role="img" aria-label="统一里程上的接续点与双端测量位置，测量详情见下方证据表"></canvas>
+          <div class="scroll"><table>
+            <caption class="sr">接续点证据</caption>
+            <thead><tr><th>点位 / 里程</th><th>甲端凭证</th><th>乙端凭证</th><th>双向均值</th><th>限值</th><th>结论</th></tr></thead>
+            <tbody id="site-rows"></tbody>
+          </table></div>
+          <div id="exceptions" class="exceptions" hidden></div>
+        </section>
+        <aside class="desk-side">
+          <section class="panel">
+            <header class="panel-head"><div><h2>采用凭证</h2><p class="muted">每端采用一份仪表凭证</p></div></header>
+            <form id="selection" class="form-stack">
+              <label id="label-a">甲端<select id="pick-a"></select></label>
+              <label id="label-b">乙端<select id="pick-b"></select></label>
+              <button id="apply" type="submit">更新采用凭证</button>
+            </form>
+          </section>
+          <section class="panel" id="review-panel" hidden>
+            <header class="panel-head"><h2>事件证据</h2><button id="close-evidence" type="button">关闭</button></header>
+            <dl class="detail" id="evidence"></dl>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><h2>签发记录</h2></header>
+            <div id="releases" class="releases"></div>
+            <form id="comparison" class="form-stack compare" hidden>
+              <label>原版本<select id="from"></select></label>
+              <label>新版本<select id="to"></select></label>
+              <button type="submit">比较版本</button>
+            </form>
+            <div id="changes" class="changes" hidden aria-live="polite"></div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </main>
+  <dialog id="ingest">
+    <form id="ingest-form" class="form-stack">
+      <header><h2 id="ingest-title"></h2><p><a id="sample-link" target="_blank" rel="noopener">打开数据样例</a></p></header>
+      <label>选择 JSON 文件<input id="file" type="file" accept=".json,application/json"></label>
+      <label>或粘贴 JSON<textarea id="json" rows="10" spellcheck="false" required></textarea></label>
+      <p id="ingest-error" role="alert" class="error"></p>
+      <div class="dialog-actions"><button id="cancel" type="button">取消</button><button class="primary" type="submit">提交资料</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

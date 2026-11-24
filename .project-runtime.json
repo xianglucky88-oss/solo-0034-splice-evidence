@@ -1,0 +1,59 @@
+{
+  "language": "Python 3 + JavaScript ES Modules",
+  "project_shape": "fullstack",
+  "testing": "deferred",
+  "source_extensions": [
+    ".py",
+    ".sql",
+    ".mjs",
+    ".css",
+    ".html"
+  ],
+  "build_command": "python3 -B -m tools.check_source",
+  "workflow_checks": [
+    {
+      "workflow_id": "plan",
+      "command": "python3 -B -m tools.smoke --through plan"
+    },
+    {
+      "workflow_id": "receipts",
+      "command": "python3 -B -m tools.smoke --through receipts"
+    },
+    {
+      "workflow_id": "selection",
+      "command": "python3 -B -m tools.smoke --through selection"
+    },
+    {
+      "workflow_id": "alignment",
+      "command": "python3 -B -m tools.smoke --through alignment"
+    },
+    {
+      "workflow_id": "matching",
+      "command": "python3 -B -m tools.smoke --through matching"
+    },
+    {
+      "workflow_id": "pairing",
+      "command": "python3 -B -m tools.smoke --through pairing"
+    },
+    {
+      "workflow_id": "closure",
+      "command": "python3 -B -m tools.smoke --through closure"
+    },
+    {
+      "workflow_id": "evidence",
+      "command": "python3 -B -m tools.smoke --through evidence"
+    },
+    {
+      "workflow_id": "issue",
+      "command": "python3 -B -m tools.smoke --through issue"
+    },
+    {
+      "workflow_id": "compare",
+      "command": "python3 -B -m tools.smoke --through compare"
+    },
+    {
+      "workflow_id": "export",
+      "command": "python3 -B -m tools.smoke --through export"
+    }
+  ]
+}

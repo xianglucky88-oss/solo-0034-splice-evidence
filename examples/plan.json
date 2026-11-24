@@ -1,0 +1,9 @@
+{
+  "span_id": "FX-W34", "label": "北岸桥引入段", "a_label": "桥北机柜", "b_label": "河西接续箱",
+  "length_mm": 1600000, "fixed_mdb": 480, "link_limit_mdb": 1260, "residual_limit_mdb": 80,
+  "sites": [
+    {"site_id": "J01", "at_mm": 360000, "window_mm": 8000, "limit_mdb": 160},
+    {"site_id": "J02", "at_mm": 810000, "window_mm": 8000, "limit_mdb": 200},
+    {"site_id": "J03", "at_mm": 1270000, "window_mm": 9000, "limit_mdb": 180}
+  ]
+}

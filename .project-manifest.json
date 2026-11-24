@@ -1,0 +1,361 @@
+{
+  "name": "纤证 · 接续损耗交接台",
+  "project_shape": "fullstack",
+  "modules": [
+    {
+      "id": "http",
+      "name": "请求接入",
+      "paths": [
+        "splice/routing.py",
+        "splice/server.py"
+      ]
+    },
+    {
+      "id": "store",
+      "name": "持久化事务",
+      "paths": [
+        "splice/db.py",
+        "splice/schema.sql"
+      ]
+    },
+    {
+      "id": "plan",
+      "name": "光段计划",
+      "paths": [
+        "splice/spans.py",
+        "splice/plan.py"
+      ]
+    },
+    {
+      "id": "receipt",
+      "name": "仪表凭证",
+      "paths": [
+        "splice/receipts.py",
+        "splice/trace.py"
+      ]
+    },
+    {
+      "id": "selection",
+      "name": "修订与双端采用",
+      "paths": [
+        "splice/selection.py"
+      ]
+    },
+    {
+      "id": "alignment",
+      "name": "统一里程换算",
+      "paths": [
+        "splice/registration.py"
+      ]
+    },
+    {
+      "id": "matching",
+      "name": "窗口归点与冲突判定",
+      "paths": [
+        "splice/matching.py",
+        "splice/windows.py"
+      ]
+    },
+    {
+      "id": "pairing",
+      "name": "双向损耗核算",
+      "paths": [
+        "splice/pairing.py"
+      ]
+    },
+    {
+      "id": "closure",
+      "name": "链路闭合",
+      "paths": [
+        "splice/budget.py"
+      ]
+    },
+    {
+      "id": "workspace",
+      "name": "工作台投影与证据回查",
+      "paths": [
+        "splice/projection.py",
+        "splice/workbench.py"
+      ]
+    },
+    {
+      "id": "release",
+      "name": "签发存证",
+      "paths": [
+        "splice/releases.py",
+        "splice/codec.py"
+      ]
+    },
+    {
+      "id": "compare",
+      "name": "口径与差值比较",
+      "paths": [
+        "splice/comparison.py"
+      ]
+    },
+    {
+      "id": "export",
+      "name": "签发件导出",
+      "paths": [
+        "splice/exports.py"
+      ]
+    },
+    {
+      "id": "browser",
+      "name": "原生浏览器工作台",
+      "paths": [
+        "web/app.mjs",
+        "web/index.html"
+      ]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "plan",
+      "name": "登记计划",
+      "entry": "POST /api/splice/spans",
+      "module_ids": [
+        "http",
+        "store",
+        "plan",
+        "browser"
+      ],
+      "steps": [
+        "校验端点、点位和损耗参数",
+        "排序并登记光段"
+      ],
+      "success": "光段从修订 0 开始",
+      "failure": "同编号绑定不同计划时返回冲突",
+      "verification": "重排点位输入不能改变设计顺序，点位编号重复被拒绝"
+    },
+    {
+      "id": "receipts",
+      "name": "收件与去重",
+      "entry": "POST /api/splice/spans/{span}/traces",
+      "module_ids": [
+        "http",
+        "store",
+        "plan",
+        "receipt"
+      ],
+      "steps": [
+        "校验仪表方向、标记和有符号损耗",
+        "保存规范内容与摘要"
+      ],
+      "success": "相同编号和内容重传复用已有记录",
+      "failure": "相同编号而内容变化返回冲突",
+      "verification": "同编号重传摘要一致，异内容拒收"
+    },
+    {
+      "id": "selection",
+      "name": "采用双端凭证",
+      "entry": "POST /api/splice/spans/{span}/selection",
+      "module_ids": [
+        "http",
+        "store",
+        "receipt",
+        "selection",
+        "browser"
+      ],
+      "steps": [
+        "检验工作修订与凭证方向",
+        "在同一事务提交两端采用状态"
+      ],
+      "success": "实际变动增加一次修订",
+      "failure": "过期修订或错方向不能改动采用",
+      "verification": "校验旧修订、单端采用、错槽及同组合重试"
+    },
+    {
+      "id": "alignment",
+      "name": "折算统一里程",
+      "entry": "GET /api/splice/spans/{span}",
+      "module_ids": [
+        "receipt",
+        "selection",
+        "alignment",
+        "matching",
+        "workspace"
+      ],
+      "steps": [
+        "取两端当前凭证及计划长度",
+        "反映乙端轴并按整数比例换算"
+      ],
+      "success": "原始读数和有理数统一里程同时可见",
+      "failure": "光段外事件留在异常证据中",
+      "verification": "核对 A7 和 B2 的精确里程"
+    },
+    {
+      "id": "matching",
+      "name": "裁决接续点归属",
+      "entry": "GET /api/splice/spans/{span}",
+      "module_ids": [
+        "plan",
+        "alignment",
+        "matching",
+        "workspace"
+      ],
+      "steps": [
+        "查找包含事件里程的闭区间窗口",
+        "检查同端重复命中同一点"
+      ],
+      "success": "输出每条事件的状态和候选点",
+      "failure": "多候选与同端碰撞不纳入损耗",
+      "verification": "验证歧义、碰撞、段外及未归点"
+    },
+    {
+      "id": "pairing",
+      "name": "计算双向接续损耗",
+      "entry": "GET /api/splice/spans/{span}",
+      "module_ids": [
+        "matching",
+        "pairing",
+        "closure",
+        "workspace"
+      ],
+      "steps": [
+        "索引两端成功归点的事件",
+        "保留有符号损耗，按均值的两倍比较限值"
+      ],
+      "success": "能追到每个点位两份方向证据",
+      "failure": "任一方向缺失时均值为空",
+      "verification": "校验样例点位的精确两倍均值"
+    },
+    {
+      "id": "closure",
+      "name": "核算链路闭合",
+      "entry": "GET /api/splice/spans/{span}",
+      "module_ids": [
+        "pairing",
+        "closure",
+        "workspace",
+        "release"
+      ],
+      "steps": [
+        "合计点位损耗与固定损耗",
+        "将实测平均值与估算值和各自限值核对"
+      ],
+      "success": "返回就绪状态与有符号闭合差",
+      "failure": "点位、链路或闭合差越界时留置",
+      "verification": "模拟测量总值升高并确认拒签"
+    },
+    {
+      "id": "evidence",
+      "name": "回查原始事件",
+      "entry": "GET /api/splice/spans/{span}/evidence/{trace}/{event}",
+      "module_ids": [
+        "http",
+        "receipt",
+        "matching",
+        "workspace",
+        "browser"
+      ],
+      "steps": [
+        "定位对应修订内的凭证与事件",
+        "返回原始行号、统一里程和候选"
+      ],
+      "success": "点位可核对来源事件和计算证据",
+      "failure": "未在当前修订中采用的凭证返回未找到",
+      "verification": "回查 A7，同时验证未采用凭证无法从当前证据入口读取"
+    },
+    {
+      "id": "issue",
+      "name": "冻结验收签发件",
+      "entry": "POST /api/splice/spans/{span}/releases",
+      "module_ids": [
+        "http",
+        "store",
+        "selection",
+        "workspace",
+        "closure",
+        "release"
+      ],
+      "steps": [
+        "核对修订并计算当前投影",
+        "通过闭合门禁后保存规范快照与摘要"
+      ],
+      "success": "同一当前修订重复签发返回原快照",
+      "failure": "过期或留置修订不能签发",
+      "verification": "校验 SHA-256 与重复签发一致性"
+    },
+    {
+      "id": "compare",
+      "name": "比较已签修订",
+      "entry": "GET /api/splice/spans/{span}/compare/{from}/{to}",
+      "module_ids": [
+        "http",
+        "store",
+        "release",
+        "compare"
+      ],
+      "steps": [
+        "读取两张历史快照并核对计划及规则集",
+        "按点位标识对齐并计算损耗差值"
+      ],
+      "success": "返回变化点位与签发前后链路指标",
+      "failure": "版本不存在或口径不同时拒绝比较",
+      "verification": "切换乙端凭证后核对点位差值及旧快照不变"
+    },
+    {
+      "id": "export",
+      "name": "导出接续点 CSV",
+      "entry": "GET /api/splice/spans/{span}/releases/{revision}/sites.csv",
+      "module_ids": [
+        "http",
+        "store",
+        "release",
+        "export"
+      ],
+      "steps": [
+        "读取指定修订签发件",
+        "按快照顺序生成带凭证和摘要的行"
+      ],
+      "success": "历史导出与冻结证据一致",
+      "failure": "未签发修订返回未找到",
+      "verification": "核对换用凭证后旧 CSV 的数值、来源和签发摘要"
+    }
+  ],
+  "complexity": {
+    "mechanisms": [
+      {
+        "id": "canonical-receipt",
+        "description": "校验后规范编码，按编号与内容分离重传和冲突"
+      },
+      {
+        "id": "transactional-selection",
+        "description": "两端采用和修订更新放在同一个写事务"
+      },
+      {
+        "id": "mirrored-registration",
+        "description": "方向归一使用有理数并镜像乙端坐标"
+      },
+      {
+        "id": "interval-ambiguity",
+        "description": "按闭区间查候选，区分重叠窗与同端事件碰撞"
+      },
+      {
+        "id": "directional-pair",
+        "description": "保留负事件损耗，并比较精确双向均值"
+      },
+      {
+        "id": "loss-reconciliation",
+        "description": "以独立实测量核对估算量、链路限值与闭合差"
+      },
+      {
+        "id": "evidence-projection",
+        "description": "事件来源与账面投影在同一修订视图内关联"
+      },
+      {
+        "id": "immutable-release",
+        "description": "快照内容、修订和摘要一同持久化"
+      },
+      {
+        "id": "comparable-versions",
+        "description": "仅在计划与规则一致的同光段签发间对齐点位"
+      },
+      {
+        "id": "frozen-export",
+        "description": "CSV 使用指定签发版本，带双端引用和签发摘要"
+      }
+    ]
+  }
+}
