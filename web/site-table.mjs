@@ -1,15 +1,19 @@
 import { action, byId, node } from './dom.mjs';
-import { blockers, direction, eventStatus, loss, meter } from './format.mjs';
+import { blockers, direction, eventStatus, loss, meter, mdb } from './format.mjs';
 
-function observationCell(event, openEvidence) {
+function observationCell(event, booked, openEvidence) {
   const cell = node('td', event ? null : '—');
   if (event) {
     cell.append(action(event.event_id, () => openEvidence(event)), node('small', loss(2 * event.loss_mdb)));
+    if (booked && booked.booked_mdb !== event.loss_mdb) {
+      cell.append(node('small', `交割 ${mdb(booked.booked_mdb)}`, 'booked'));
+    }
   }
   return cell;
 }
 
 export function renderSites(work, openEvidence) {
+  const bookedSites = new Map(work.delivery.sites.map((site) => [site.site_id, site]));
   byId('site-rows').replaceChildren(...work.sites.map((site) => {
     const row = node('tr');
     const point = node('td', site.site_id);
@@ -17,19 +21,26 @@ export function renderSites(work, openEvidence) {
     const status = node('td');
     const label = { pass: '通过', over: '超限', incomplete: '待补证' }[site.status];
     status.append(node('span', label, `status ${site.status === 'pass' ? 'good' : 'warn'}`));
-    row.append(point, observationCell(site.observations.a, openEvidence), observationCell(site.observations.b, openEvidence),
-      node('td', loss(site.mean_x2_mdb)), node('td', loss(2 * site.limit_mdb)), status);
+    const booked = bookedSites.get(site.site_id);
+    row.append(
+      point,
+      observationCell(site.observations.a, booked?.observations.a, openEvidence),
+      observationCell(site.observations.b, booked?.observations.b, openEvidence),
+      node('td', loss(site.mean_x2_mdb)),
+      node('td', booked ? mdb(booked.mean_x2_mdb) : '—'),
+      node('td', loss(2 * site.limit_mdb)), status);
     return row;
   }));
   const exceptions = byId('exceptions');
-  exceptions.hidden = !work.budget.blockers.length;
+  const allBlockers = [...work.budget.blockers, ...work.delivery.blockers];
+  exceptions.hidden = !allBlockers.length;
   const issues = node('ul');
   for (const event of work.events.filter((value) => value.status !== 'matched')) {
     const issue = node('li');
     issue.append(action(`${direction[event.direction]} ${event.event_id} · ${eventStatus[event.status]}`, () => openEvidence(event)));
     issues.append(issue);
   }
-  exceptions.replaceChildren(node('p', work.budget.blockers.map((value) => blockers[value]).join(' · '), 'error'), issues);
+  exceptions.replaceChildren(node('p', allBlockers.map((value) => blockers[value] || value).join(' · '), 'error'), issues);
 }
 
 export function renderEvidence({ event, sites, revision }) {

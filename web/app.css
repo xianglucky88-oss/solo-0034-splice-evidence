@@ -64,6 +64,7 @@ th { background: #f2f6ed; color: #45635a; font-size: .77rem; }
 td:first-child, th:first-child { padding-left: 1.15rem; }
 td:last-child, th:last-child { padding-right: 1.15rem; }
 td small { display: block; color: var(--muted); margin-top: .22rem; }
+td small.booked { color: #8a5a16; font-weight: 650; }
 .link-button { border: 0; min-height: 32px; padding: 0; color: var(--accent); text-align: left; background: transparent; text-decoration: underline; text-underline-offset: 3px; }
 .exceptions { border-top: 1px solid var(--stroke); padding: .9rem 1.15rem; }
 .exceptions ul { margin: .4rem 0 0; padding-left: 1.2rem; }

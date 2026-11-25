@@ -20,6 +20,14 @@ def get_release(connection, span_id, revision):
     return {'digest': row['digest'], 'snapshot': unpack(row['payload'])}
 
 
+def find_release_by_digest(connection, span_id, sha):
+    row = connection.execute('SELECT revision, digest, payload FROM releases WHERE span_id = ? AND digest = ?',
+                             (span_id, sha)).fetchone()
+    if row is None:
+        raise Problem('未找到该摘要对应的签发件', 404)
+    return {'revision': row['revision'], 'digest': row['digest'], 'snapshot': unpack(row['payload'])}
+
+
 def issue(connection, span_id, raw):
     revision = revision_from(fields(raw, 'revision')['revision'])
     span = find_span(connection, span_id)
@@ -31,6 +39,8 @@ def issue(connection, span_id, raw):
     snapshot = workspace(connection, span_id)
     if snapshot['budget']['status'] != 'ready':
         raise Problem('当前修订仍有留置项，无法签发', 409)
+    if snapshot['delivery']['status'] != 'ready':
+        raise Problem('缺少合格的整数交割明细，无法签发', 409)
     data = pack(snapshot)
     sha = digest(data)
     connection.execute('INSERT INTO releases VALUES (?, ?, ?, ?)', (span_id, revision, sha, data))

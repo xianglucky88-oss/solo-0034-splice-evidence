@@ -1,8 +1,9 @@
 {
-  "trace_id": "B-204", "direction": "b", "near_mm": 20500, "far_mm": 1622500, "total_mdb": 910,
+  "trace_id": "B-204", "direction": "b", "near_mm": 20500, "far_mm": 1622500,
+  "total_unit": "mdb", "total_mdb": 910,
   "events": [
-    {"event_id": "B3", "at_mm": 351000, "loss_mdb": 173},
-    {"event_id": "B7", "at_mm": 812000, "loss_mdb": 131},
-    {"event_id": "B9", "at_mm": 1262300, "loss_mdb": 132}
+    {"event_id": "B3", "at_mm": 351000, "loss_unit": "mdb", "loss_mdb": 173},
+    {"event_id": "B7", "at_mm": 812000, "loss_unit": "db", "loss_db": 0.131},
+    {"event_id": "B9", "at_mm": 1262300, "loss_unit": "mdb", "loss_mdb": 132}
   ]
 }

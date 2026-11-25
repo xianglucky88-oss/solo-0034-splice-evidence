@@ -31,7 +31,8 @@
       "name": "仪表凭证",
       "paths": [
         "splice/receipts.py",
-        "splice/trace.py"
+        "splice/trace.py",
+        "splice/measure.py"
       ]
     },
     {
@@ -68,6 +69,13 @@
       "name": "链路闭合",
       "paths": [
         "splice/budget.py"
+      ]
+    },
+    {
+      "id": "delivery",
+      "name": "整数交割明细",
+      "paths": [
+        "splice/delivery.py"
       ]
     },
     {
@@ -139,12 +147,12 @@
         "receipt"
       ],
       "steps": [
-        "校验仪表方向、标记和有符号损耗",
-        "保存规范内容与摘要"
+        "按分贝或毫分贝精确换算到半毫分贝网格",
+        "保存规范内容、摘要与首收原文"
       ],
-      "success": "相同编号和内容重传复用已有记录",
-      "failure": "相同编号而内容变化返回冲突",
-      "verification": "同编号重传摘要一致，异内容拒收"
+      "success": "相同编号和规范内容（含换单位）重传复用已有记录",
+      "failure": "相同编号而内容变化返回冲突，非网格读数拒收",
+      "verification": "换单位重传摘要一致，改数值方向标记事件行序拒收"
     },
     {
       "id": "selection",
@@ -239,6 +247,25 @@
       "verification": "模拟测量总值升高并确认拒签"
     },
     {
+      "id": "delivery",
+      "name": "生成整数交割明细",
+      "entry": "GET /api/splice/spans/{span}",
+      "module_ids": [
+        "pairing",
+        "closure",
+        "delivery",
+        "workspace",
+        "release"
+      ],
+      "steps": [
+        "每向点位读数按 floor/ceil 取整并满足合计守恒",
+        "以 Hall 后缀条件求字典序最小且过限值的分配"
+      ],
+      "success": "输出逐点原值、入账值、每向合计与闭合指标",
+      "failure": "无合格明细时留置并阻止签发",
+      "verification": "100.5/99.5 四笔入账 100，单点无明细拒签"
+    },
+    {
       "id": "evidence",
       "name": "回查原始事件",
       "entry": "GET /api/splice/spans/{span}/evidence/{trace}/{event}",
@@ -271,11 +298,11 @@
       ],
       "steps": [
         "核对修订并计算当前投影",
-        "通过闭合门禁后保存规范快照与摘要"
+        "通过闭合与整数交割双门禁后保存规范快照与摘要"
       ],
-      "success": "同一当前修订重复签发返回原快照",
-      "failure": "过期或留置修订不能签发",
-      "verification": "校验 SHA-256 与重复签发一致性"
+      "success": "同一当前修订重复签发返回原快照，可按摘要查回",
+      "failure": "过期、留置或缺少交割明细的修订不能签发",
+      "verification": "校验 SHA-256、摘要查回与重复签发一致性"
     },
     {
       "id": "compare",
@@ -297,8 +324,8 @@
     },
     {
       "id": "export",
-      "name": "导出接续点 CSV",
-      "entry": "GET /api/splice/spans/{span}/releases/{revision}/sites.csv",
+      "name": "导出接续点与交割 CSV",
+      "entry": "GET /api/splice/spans/{span}/releases/{revision}/delivery.csv",
       "module_ids": [
         "http",
         "store",
@@ -307,11 +334,11 @@
       ],
       "steps": [
         "读取指定修订签发件",
-        "按快照顺序生成带凭证和摘要的行"
+        "按快照顺序生成双端引用、原值入账值和摘要行"
       ],
       "success": "历史导出与冻结证据一致",
       "failure": "未签发修订返回未找到",
-      "verification": "核对换用凭证后旧 CSV 的数值、来源和签发摘要"
+      "verification": "核对交割 CSV 的入账值、每向合计与签发摘要"
     }
   ],
   "complexity": {
@@ -319,6 +346,14 @@
       {
         "id": "canonical-receipt",
         "description": "校验后规范编码，按编号与内容分离重传和冲突"
+      },
+      {
+        "id": "unit-normalized-receipt",
+        "description": "分贝与毫分贝精确换算到半毫网格，换单位同内容识别为重传并留首收原文"
+      },
+      {
+        "id": "integer-delivery",
+        "description": "每向守恒的整数取整，字典序最小且过全部限值的交割分配"
       },
       {
         "id": "transactional-selection",

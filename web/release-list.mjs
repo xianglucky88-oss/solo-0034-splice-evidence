@@ -15,7 +15,8 @@ export function renderReleases(path, releases, open) {
     const button = action(`修订 ${revision}`, () => open(revision));
     button.title = `SHA-256 ${digest}`;
     const source = `${path}/releases/${revision}`;
-    row.append(button, resource(source, 'JSON'), resource(`${source}/sites.csv`, '接续点 CSV'));
+    row.append(button, resource(source, 'JSON'), resource(`${source}/sites.csv`, '接续点 CSV'),
+      resource(`${source}/delivery.csv`, '交割 CSV'));
     return row;
   });
   byId('releases').replaceChildren(...(entries.length ? entries : [node('p', '尚无签发记录', 'muted')]));

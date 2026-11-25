@@ -14,5 +14,8 @@ def compare(connection, span_id, left, right):
         if previous != site:
             changed.append({'site_id': site['site_id'], 'before': previous, 'after': site,
                             'delta_x2_mdb': site['mean_x2_mdb'] - previous['mean_x2_mdb']})
+    delivery_changed = before['delivery'] != after['delivery']
     return {'from': left, 'to': right, 'sites': changed, 'before': before['budget'], 'after': after['budget'],
-            'active_before': before['active'], 'active_after': after['active']}
+            'active_before': before['active'], 'active_after': after['active'],
+            'delivery_before': before['delivery'], 'delivery_after': after['delivery'],
+            'delivery_changed': delivery_changed}

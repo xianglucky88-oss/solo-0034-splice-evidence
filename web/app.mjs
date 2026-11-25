@@ -52,7 +52,8 @@ async function show(id, archived = null) {
   byId('workspace').hidden = false;
   byId('live').hidden = archived == null;
   byId('import-trace').disabled = archived != null;
-  byId('issue').disabled = archived != null || work.budget.status !== 'ready';
+  byId('issue').disabled = archived != null || work.budget.status !== 'ready'
+    || work.delivery.status !== 'ready';
   byId('review-panel').hidden = true;
   renderSummary(work, archived != null);
   renderSites(work, evidence);

@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS traces (
     direction TEXT NOT NULL CHECK (direction IN ('a', 'b')),
     digest TEXT NOT NULL,
     payload BLOB NOT NULL,
+    origin BLOB NOT NULL DEFAULT X'7b7d',
     PRIMARY KEY (span_id, trace_id),
     UNIQUE (span_id, trace_id, direction)
 );

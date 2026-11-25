@@ -11,6 +11,9 @@ class Database:
         with self.connect() as connection:
             connection.execute('PRAGMA journal_mode = WAL')
             connection.executescript(Path(__file__).with_name('schema.sql').read_text(encoding='utf-8'))
+            columns = {row['name'] for row in connection.execute('PRAGMA table_info(traces)')}
+            if 'origin' not in columns:
+                connection.execute("ALTER TABLE traces ADD COLUMN origin BLOB NOT NULL DEFAULT X'7b7d'")
 
     @contextmanager
     def connect(self):
