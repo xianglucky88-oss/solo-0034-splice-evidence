@@ -47,6 +47,7 @@
             <thead><tr><th>点位 / 里程</th><th>甲端凭证</th><th>乙端凭证</th><th>双向均值</th><th>限值</th><th>结论</th></tr></thead>
             <tbody id="site-rows"></tbody>
           </table></div>
+          <div id="review-results" class="review-results" hidden></div>
           <div id="exceptions" class="exceptions" hidden></div>
         </section>
         <aside class="desk-side">
@@ -56,6 +57,22 @@
               <label id="label-a">甲端<select id="pick-a"></select></label>
               <label id="label-b">乙端<select id="pick-b"></select></label>
               <button id="apply" type="submit">更新采用凭证</button>
+            </form>
+          </section>
+          <section class="panel" id="review-panel-form">
+            <header class="panel-head"><div><h2>同向重测复核</h2><p class="muted">三至九份不同凭证，新收件不自动加入</p></div></header>
+            <form id="review-form" class="form-stack">
+              <label>复核方向<select id="review-direction">
+                <option value="b">乙端重测 · 对甲端逐份核算</option>
+                <option value="a">甲端重测 · 对乙端逐份核算</option>
+              </select></label>
+              <label>容差（毫分贝）<input id="review-tolerance" type="number" min="0" step="1" value="10" required></label>
+              <label>采用名单（按住 Ctrl 多选，按展示顺序入组）<select id="review-traces" multiple size="6"></select></label>
+              <div class="dialog-actions">
+                <button id="review-clear" type="button">清除名单</button>
+                <button id="review-save" class="primary" type="submit">确认新修订</button>
+              </div>
+              <p id="review-note" class="muted"></p>
             </form>
           </section>
           <section class="panel" id="review-panel" hidden>

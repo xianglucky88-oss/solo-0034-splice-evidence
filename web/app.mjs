@@ -4,6 +4,7 @@ import { loadDemo } from './demo.mjs';
 import { byId, options } from './dom.mjs';
 import { setupIngest } from './ingest.mjs';
 import { renderChanges, renderReleases } from './release-list.mjs';
+import { renderReviewForm, renderReviewResults, reviewClear, reviewSubmission } from './review.mjs';
 import { ruler } from './ruler.mjs';
 import { renderEvidence, renderSites } from './site-table.mjs';
 import { renderSummary } from './summary.mjs';
@@ -44,7 +45,8 @@ async function show(id, archived = null) {
   const version = ++state.version;
   const base = spanPath(id);
   const detail = archived == null ? get(base) : get(`${base}/releases/${archived}`).then((result) => result.snapshot);
-  const [work, receipts, releases] = await Promise.all([detail, get(`${base}/traces`), get(`${base}/releases`)]);
+  const [work, receipts, releases, rosters] = await Promise.all([
+    detail, get(`${base}/traces`), get(`${base}/releases`), get(`${base}/rosters`)]);
   if (state.version !== version) return;
   Object.assign(state, { id, archived, revision: work.revision });
   byId('span').value = id;
@@ -54,9 +56,17 @@ async function show(id, archived = null) {
   byId('import-trace').disabled = archived != null;
   byId('issue').disabled = archived != null || work.budget.status !== 'ready';
   byId('review-panel').hidden = true;
+  const reviewMode = work.mode === 'review';
+  byId('site-rows').closest('.scroll').hidden = reviewMode;
   renderSummary(work, archived != null);
-  renderSites(work, evidence);
-  renderAdoption(work, receipts, archived != null);
+  if (reviewMode) {
+    byId('exceptions').hidden = true;
+    renderReviewResults(work);
+  } else {
+    renderSites(work, evidence);
+    renderReviewResults(work);
+  }  renderAdoption(work, receipts, archived != null);
+  renderReviewForm(work, receipts, archived != null, rosters);
   renderReleases(base, releases, (revision) => guarded(() => show(id, revision)));
   draw(work);
 }
@@ -105,6 +115,32 @@ byId('selection').addEventListener('submit', (event) => {
     flash('采用凭证已保存');
   });
 });
+byId('review-direction').addEventListener('change', () => guarded(async () => {
+  const id = state.id;
+  const base = spanPath(id);
+  const [work, receipts, rosters] = await Promise.all([get(base), get(`${base}/traces`), get(`${base}/rosters`)]);
+  renderReviewForm(work, receipts, state.archived != null, rosters);
+}));
+byId('review-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  guarded(async () => {
+    const id = state.id;
+    const submission = reviewSubmission(state.revision);
+    if (submission.payload.traces.length < 3 || submission.payload.traces.length > 9) {
+      flash('同向重测复核需要三至九份不同凭证', true);
+      return;
+    }
+    await post(`${spanPath(id)}/${submission.path}`, submission.payload);
+    await show(id);
+    flash('复核名单已确认并生成新修订');
+  });
+});
+byId('review-clear').addEventListener('click', () => guarded(async () => {
+  const id = state.id;
+  await post(`${spanPath(id)}/${reviewClear(state.revision).path}`, reviewClear(state.revision).payload);
+  await show(id);
+  flash('已清除复核名单，回到双端单份采用');
+}));
 byId('issue').addEventListener('click', () => guarded(async () => {
   const id = state.id;
   const result = await post(`${spanPath(id)}/releases`, { revision: state.revision });

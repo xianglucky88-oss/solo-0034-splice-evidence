@@ -28,6 +28,21 @@ export function renderReleases(path, releases, open) {
 
 export function renderChanges(changes) {
   const display = byId('changes');
+  if (changes.mode === 'review') {
+    const list = node('ul');
+    for (const member of changes.members) {
+      const label = member.kind === 'member_added' ? '新增组员'
+        : member.kind === 'member_removed' ? '移除组员'
+        : `闭合差 ${loss(member.residual_before)} → ${loss(member.residual_after)}`;
+      list.append(node('li', `${member.trace_id} · ${label}`));
+    }
+    display.replaceChildren(
+      node('p', `修订 ${changes.from} → ${changes.to} · 同向复核 ${changes.members.length} 名组员有变化`),
+      node('p', `最大组 ${changes.review_before.group.join('、') || '无'} → ${changes.review_after.group.join('、') || '无'}`,
+        'muted'), list);
+    display.hidden = false;
+    return;
+  }
   const list = node('ul');
   for (const site of changes.sites) {
     const label = site.delta_x2_mdb === 0 ? '损耗不变，证据有变化' : `变化 ${loss(site.delta_x2_mdb)}`;

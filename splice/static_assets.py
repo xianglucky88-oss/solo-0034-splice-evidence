@@ -12,7 +12,7 @@ def asset(path):
         target = ROOT / 'web/index.html'
     elif re.fullmatch(r'/assets/[a-z][a-z-]*\.(?:mjs|css)', path):
         target = ROOT / 'web' / path.rsplit('/', 1)[-1]
-    elif re.fullmatch(r'/examples/(?:plan|a|b|b-repeat)\.json', path):
+    elif re.fullmatch(r'/examples/(?:plan|a|b|b-repeat|repeat-[1-4])\.json', path):
         target = ROOT / path[1:]
     else:
         raise Problem('没有这个页面', 404)

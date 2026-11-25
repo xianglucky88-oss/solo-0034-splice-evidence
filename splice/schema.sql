@@ -19,6 +19,16 @@ CREATE TABLE IF NOT EXISTS active_traces (
     PRIMARY KEY (span_id, direction),
     FOREIGN KEY (span_id, trace_id, direction) REFERENCES traces(span_id, trace_id, direction)
 );
+CREATE TABLE IF NOT EXISTS review_rosters (
+    span_id TEXT NOT NULL REFERENCES spans(span_id),
+    direction TEXT NOT NULL CHECK (direction IN ('a', 'b')),
+    trace_id TEXT NOT NULL,
+    position INTEGER NOT NULL CHECK (position >= 0),
+    tolerance_mdb INTEGER NOT NULL CHECK (tolerance_mdb >= 0),
+    PRIMARY KEY (span_id, direction, trace_id),
+    UNIQUE (span_id, direction, position),
+    FOREIGN KEY (span_id, trace_id, direction) REFERENCES traces(span_id, trace_id, direction)
+);
 CREATE TABLE IF NOT EXISTS releases (
     span_id TEXT NOT NULL REFERENCES spans(span_id),
     revision INTEGER NOT NULL,

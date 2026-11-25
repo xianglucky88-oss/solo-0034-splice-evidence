@@ -6,6 +6,7 @@ from .errors import Problem
 from .exports import site_csv
 from .receipts import get_trace, list_traces, receive
 from .releases import get_release, issue, list_releases
+from .rosters import clear_roster, get_rosters, save_roster
 from .selection import select
 from .spans import create_span, list_spans
 from .workbench import event_evidence, workspace
@@ -39,6 +40,7 @@ READ = (
     (r'/spans', list_spans),
     (SPAN, workspace),
     (SPAN + r'/traces', list_traces),
+    (SPAN + r'/rosters', get_rosters),
     (SPAN + r'/traces/' + TRACE, get_trace),
     (SPAN + r'/evidence/' + TRACE + '/' + EVENT, _evidence),
     (SPAN + r'/releases', list_releases),
@@ -52,6 +54,8 @@ WRITE = (
     (r'/spans', create_span),
     (SPAN + r'/traces', receive),
     (SPAN + r'/selection', select),
+    (SPAN + r'/rosters', save_roster),
+    (SPAN + r'/rosters/clear', clear_roster),
     (SPAN + r'/releases', issue),
 )
 

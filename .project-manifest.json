@@ -42,6 +42,14 @@
       ]
     },
     {
+      "id": "review",
+      "name": "同向重测一致性复核",
+      "paths": [
+        "splice/review.py",
+        "splice/rosters.py"
+      ]
+    },
+    {
       "id": "alignment",
       "name": "统一里程换算",
       "paths": [
@@ -105,6 +113,7 @@
       "name": "原生浏览器工作台",
       "paths": [
         "web/app.mjs",
+        "web/review.mjs",
         "web/index.html"
       ]
     }
@@ -164,6 +173,27 @@
       "success": "实际变动增加一次修订",
       "failure": "过期修订或错方向不能改动采用",
       "verification": "校验旧修订、单端采用、错槽及同组合重试"
+    },
+    {
+      "id": "review",
+      "name": "同向重测一致性复核",
+      "entry": "POST /api/splice/spans/{span}/rosters",
+      "module_ids": [
+        "http",
+        "store",
+        "receipt",
+        "review",
+        "workspace",
+        "browser"
+      ],
+      "steps": [
+        "校验三至九份不同同向凭证与统一容差并推进修订",
+        "每份凭证独立归点并记录未入组原因",
+        "按容差求唯一过半最大相容组并与另一端逐份核算闭合"
+      ],
+      "success": "唯一过半组全员通过限值时复核投影可签发",
+      "failure": "待处置事件、无唯一过半组或组员闭合超限均留置",
+      "verification": "验证容差 10 毫分贝下无组可签与换件后两份入组两个场景"
     },
     {
       "id": "alignment",

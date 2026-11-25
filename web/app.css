@@ -78,6 +78,12 @@ textarea { padding: .65rem; resize: vertical; font-family: ui-monospace, monospa
 .detail { margin: 0; padding: 0 1.15rem .95rem; display: grid; grid-template-columns: minmax(70px, auto) 1fr; gap: .4rem .5rem; font-size: .84rem; }
 .detail dt { color: var(--muted); }
 .detail dd { margin: 0; overflow-wrap: anywhere; }
+.review-results { border-top: 1px solid var(--stroke); padding: .95rem 1.15rem 1.1rem; display: grid; gap: .8rem; }
+.review-head { display: flex; align-items: center; justify-content: space-between; gap: .8rem; flex-wrap: wrap; }
+.review-head h2 { font-size: 1rem; }
+.review-results .error { margin: 0; }
+#review-traces { min-height: 150px; }
+#review-note { min-height: 2.4em; }
 .empty { padding: 3rem 0; }
 .empty p:last-child { margin-top: .8rem; color: var(--muted); }
 dialog { color: inherit; border: 1px solid var(--stroke); border-radius: 12px; padding: 1.1rem 0 .2rem; width: min(550px, calc(100vw - 2rem)); background: var(--panel); }

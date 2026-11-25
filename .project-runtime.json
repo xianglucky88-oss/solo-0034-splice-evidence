@@ -24,6 +24,10 @@
       "command": "python3 -B -m tools.smoke --through selection"
     },
     {
+      "workflow_id": "review",
+      "command": "python3 -B -m tools.review_check"
+    },
+    {
       "workflow_id": "alignment",
       "command": "python3 -B -m tools.smoke --through alignment"
     },

@@ -1,0 +1,7 @@
+{
+  "trace_id": "B-304", "direction": "b", "near_mm": 20000, "far_mm": 1620000, "total_mdb": 430,
+  "events": [
+    {"event_id": "R41", "at_mm": 1255000, "loss_mdb": 205},
+    {"event_id": "R42", "at_mm": 800000, "loss_mdb": 225}
+  ]
+}
