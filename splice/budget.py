@@ -1,13 +1,15 @@
 from .trace import DIRECTIONS
 
 
-def closure(plan, traces, sites, events):
+def closure(plan, traces, sites, events, calibrations=()):
     totals = {item['direction']: item['total_mdb'] for item in traces}
     blockers = []
     missing = [side for side in DIRECTIONS if side not in totals]
     if missing:
         blockers.append('missing_trace')
-    if any(item['status'] != 'matched' for item in events):
+    if any(item['status'] == 'held' for item in calibrations):
+        blockers.append('calibration_held')
+    if any(item['status'] not in ('matched', 'held') for item in events):
         blockers.append('unassigned_events')
     complete = all(site['mean_x2_mdb'] is not None for site in sites)
     if not complete:

@@ -12,7 +12,7 @@ export function ruler(canvas) {
     canvas.height = Math.round(height * ratio);
     const ctx = canvas.getContext('2d');
     ctx.scale(ratio, ratio);
-    const x = (at) => 26 + at * (width - 52) / plan.length_mm;
+    const x = (at) => 26 + at * (width - 52) / (plan.length_mm || 1);
     ctx.font = '11px system-ui';
     ctx.fillStyle = '#546964';
     ctx.fillText('甲端', 25, 24);
@@ -33,6 +33,12 @@ export function ruler(canvas) {
         ctx.fillText(site.site_id, left, 48);
         previous = left + half;
       }
+    }
+    for (const at of plan.marks_mm || []) {
+      ctx.fillStyle = '#8d471b';
+      ctx.beginPath();
+      ctx.moveTo(x(at), 52); ctx.lineTo(x(at) + 5, 58); ctx.lineTo(x(at), 64); ctx.lineTo(x(at) - 5, 58);
+      ctx.closePath(); ctx.fill();
     }
     for (const event of events) {
       if (!event.along_mm) continue;

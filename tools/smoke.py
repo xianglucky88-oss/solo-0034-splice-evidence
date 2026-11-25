@@ -82,8 +82,88 @@ def check(base, through):
                   {'event_id': 'unmapped', 'at_mm': 740000, 'loss_mdb': 20}]
     request(base, limited + '/traces', {**a, 'events': exceptions})
     request(base, limited + '/selection', {'revision': 0, 'a': a['trace_id'], 'b': None})
-    assert [event['status'] for event in request(base, limited)['events']] == [
-        'ambiguous', 'collision', 'collision', 'outside', 'unmapped']
+    limited_events = request(base, limited)['events']
+    assert [event['status'] for event in limited_events] == [
+        'undetermined', 'contested', 'contested', 'outside', 'unmapped']
+    assert limited_events[0]['basis'] == 'overlap'
+    assert limited_events[1]['basis'] == limited_events[2]['basis'] == 'same_end'
+
+    def narrow(span_id, sites, events):
+        request(base, api, {**plan, 'span_id': span_id, 'sites': sites})
+        request(base, f'{api}/{span_id}/traces', {**a, 'events': events})
+        request(base, f'{api}/{span_id}/selection', {'revision': 0, 'a': a['trace_id'], 'b': None})
+        return request(base, f'{api}/{span_id}')['events']
+
+    pair = [{'site_id': 'K1', 'at_mm': 500000, 'window_mm': 100000, 'limit_mdb': 100},
+            {'site_id': 'K2', 'at_mm': 600000, 'window_mm': 100000, 'limit_mdb': 100}]
+    # Two distinct mileages inside the shared window still pair in mileage order,
+    # while a lone event that fits both sites has no determined ownership.
+    layering = narrow('DEMO-LAYER', pair, [
+        {'event_id': 'S1', 'at_mm': 520000, 'loss_mdb': 0},
+        {'event_id': 'S2', 'at_mm': 580000, 'loss_mdb': 0}])
+    assert [(event['status'], event.get('site_id')) for event in layering] == [
+        ('matched', 'K1'), ('matched', 'K2')]
+    assert [(row['observations']['a']['event_id'], row['site_id']) for row in
+            request(base, f'{api}/DEMO-LAYER')['sites']] == [('S1', 'K1'), ('S2', 'K2')]
+    sole = narrow('DEMO-SOLE', pair, [{'event_id': 'S1', 'at_mm': 550000, 'loss_mdb': 0}])
+    assert [(event['status'], event['basis']) for event in sole] == [('undetermined', 'overlap')]
+    costly = narrow('DEMO-COST', pair, [
+        {'event_id': 'S1', 'at_mm': 480000, 'loss_mdb': 0},
+        {'event_id': 'S2', 'at_mm': 550000, 'loss_mdb': 0},
+        {'event_id': 'S3', 'at_mm': 650000, 'loss_mdb': 0}])
+    assert [(event['status'], event['basis']) for event in costly] == [
+        ('contested', 'competing')] * 3
+
+    # A 100 m span whose plan marks 50 m field: both scans read 0 and 100, while
+    # the 50 m mark reads 60 m from A and 40 m from B.  The 50 m reading lands in
+    # the 48–52 m window and the 55 m reading in the 50–58 m window; only the
+    # maximum pairing can tell the two marked events apart.
+    marked = {**plan, 'span_id': 'DEMO-MARKS', 'length_mm': 100000, 'marks_mm': [50000],
+              'sites': [{'site_id': 'M1', 'at_mm': 50000, 'window_mm': 2000, 'limit_mdb': 100},
+                        {'site_id': 'M2', 'at_mm': 54000, 'window_mm': 4000, 'limit_mdb': 100}]}
+    request(base, api, marked)
+    marked_a = {'trace_id': 'MA', 'direction': 'a', 'near_mm': 0, 'far_mm': 100000, 'total_mdb': 100,
+                'marks_mm': [60000], 'events': [{'event_id': 'MA1', 'at_mm': 60000, 'loss_mdb': 10},
+                                                {'event_id': 'MA2', 'at_mm': 64000, 'loss_mdb': 10}]}
+    marked_b = {'trace_id': 'MB', 'direction': 'b', 'near_mm': 0, 'far_mm': 100000, 'total_mdb': 100,
+                'marks_mm': [40000], 'events': [{'event_id': 'MB1', 'at_mm': 40000, 'loss_mdb': 10},
+                                                {'event_id': 'MB2', 'at_mm': 36000, 'loss_mdb': 10}]}
+    for trace in (marked_a, marked_b):
+        request(base, f'{api}/DEMO-MARKS/traces', trace)
+    request(base, f'{api}/DEMO-MARKS/selection', {'revision': 0, 'a': 'MA', 'b': 'MB'})
+    marked_work = request(base, f'{api}/DEMO-MARKS')
+    assert {row['event_id']: row['along_mm'] for row in marked_work['events']} == {
+        'MA1': {'numerator': 50000, 'denominator': 1}, 'MA2': {'numerator': 55000, 'denominator': 1},
+        'MB1': {'numerator': 50000, 'denominator': 1}, 'MB2': {'numerator': 55000, 'denominator': 1}}
+    assert all(entry['status'] == 'ok' for entry in marked_work['calibrations'])
+    assert [row['mean_x2_mdb'] for row in marked_work['sites']] == [20, 20]
+    assert [row['observations']['a']['event_id'] for row in marked_work['sites']] == ['MA1', 'MA2']
+    assert [row['observations']['b']['event_id'] for row in marked_work['sites']] == ['MB1', 'MB2']
+
+    # B read the marks in the wrong order: the whole direction is held.
+    ordered = {**plan, 'span_id': 'DEMO-ORDER', 'length_mm': 100000, 'marks_mm': [30000, 70000],
+               'sites': [{'site_id': 'N1', 'at_mm': 50000, 'window_mm': 5000, 'limit_mdb': 100}]}
+    request(base, api, ordered)
+    request(base, f'{api}/DEMO-ORDER/traces',
+            {'trace_id': 'OE', 'direction': 'a', 'near_mm': 0, 'far_mm': 100000, 'total_mdb': 100,
+             'marks_mm': [60000, 40000], 'events': [{'event_id': 'OE1', 'at_mm': 50000, 'loss_mdb': 10}]})
+    request(base, f'{api}/DEMO-ORDER/selection', {'revision': 0, 'a': 'OE', 'b': None})
+    order_work = request(base, f'{api}/DEMO-ORDER')
+    assert order_work['calibrations'][0]['reason'] == 'mark_order'
+    assert order_work['events'][0]['status'] == 'held'
+    assert 'calibration_held' in order_work['budget']['blockers']
+    # Reporting fewer marks than the plan requires also holds the direction.
+    request(base, f'{api}/DEMO-ORDER/traces',
+            {'trace_id': 'OE-MISS', 'direction': 'a', 'near_mm': 0, 'far_mm': 100000, 'total_mdb': 100,
+             'marks_mm': [60000], 'events': [{'event_id': 'OE1', 'at_mm': 50000, 'loss_mdb': 10}]})
+    request(base, f'{api}/DEMO-ORDER/selection', {'revision': 1, 'a': 'OE-MISS', 'b': None})
+    missing_work = request(base, f'{api}/DEMO-ORDER')
+    assert missing_work['calibrations'][0]['reason'] == 'mark_count'
+    assert missing_work['events'][0]['status'] == 'held'
+    evidence = request(base, f'{api}/DEMO-MARKS/evidence/MA/MA1')
+    assert evidence['calibration']['status'] == 'ok' and evidence['calibration']['marks'][1]['at_mm'] == {
+        'numerator': 50000, 'denominator': 1}
+    assert [site['site_id'] for site in evidence['sites']] == ['M1', 'M2']
     if steps[through] < steps['pairing']:
         return
 

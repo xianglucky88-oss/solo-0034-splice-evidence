@@ -23,9 +23,11 @@ def integer(value, field, low, high):
     return value
 
 
-def fields(value, *required):
-    if not isinstance(value, dict) or value.keys() != set(required):
-        raise Problem(f'应提供以下字段：{", ".join(required)}')
+def fields(value, *required, optional=()):
+    allowed = set(required) | set(optional)
+    if not isinstance(value, dict) or not set(required) <= value.keys() or not value.keys() <= allowed:
+        names = list(required) + [f'{name}（可选）' for name in optional]
+        raise Problem(f'应提供以下字段：{", ".join(names)}')
     return value
 
 

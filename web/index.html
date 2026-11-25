@@ -40,8 +40,9 @@
         <section class="panel alignment">
           <header class="panel-head"><div><h2>双端里程对照</h2><p id="revision-note" class="muted"></p></div>
             <button id="live" type="button" hidden>返回当前修订</button></header>
-          <div class="legend" aria-hidden="true"><span>设计接续点</span><span>甲端事件</span><span>乙端事件</span></div>
+          <div class="legend" aria-hidden="true"><span>设计接续点</span><span>中间标记</span><span>甲端事件</span><span>乙端事件</span></div>
           <canvas id="ruler" role="img" aria-label="统一里程上的接续点与双端测量位置，测量详情见下方证据表"></canvas>
+          <div id="calibrations" class="calibrations" hidden aria-label="双向标记换算"></div>
           <div class="scroll"><table>
             <caption class="sr">接续点证据</caption>
             <thead><tr><th>点位 / 里程</th><th>甲端凭证</th><th>乙端凭证</th><th>双向均值</th><th>限值</th><th>结论</th></tr></thead>

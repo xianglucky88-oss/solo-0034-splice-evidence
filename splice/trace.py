@@ -6,11 +6,15 @@ DIRECTIONS = ('a', 'b')
 
 
 def trace_from(value):
-    fields(value, 'trace_id', 'direction', 'near_mm', 'far_mm', 'total_mdb', 'events')
+    fields(value, 'trace_id', 'direction', 'near_mm', 'far_mm', 'total_mdb', 'events', optional=('marks_mm',))
     near = integer(value['near_mm'], '近端标记', 0, MAX_DISTANCE - 1)
     far = integer(value['far_mm'], '远端标记', near + 1, MAX_DISTANCE)
     if value['direction'] not in DIRECTIONS:
         raise Problem('测量方向必须为 a 或 b')
+    marks = []
+    if 'marks_mm' in value:
+        for raw_mark in rows(value['marks_mm'], '中间标记读数', 0, 500):
+            marks.append(integer(raw_mark, '中间标记读数', 0, MAX_DISTANCE))
     events = []
     existing = set()
     for raw in rows(value['events'], '测量事件', 0, 2000):
@@ -23,6 +27,9 @@ def trace_from(value):
             'event_id': event_id, 'at_mm': integer(row['at_mm'], '仪表里程', 0, MAX_DISTANCE),
             'loss_mdb': integer(row['loss_mdb'], '有符号事件损耗', -MAX_LOSS, MAX_LOSS),
         })
-    return {'trace_id': key(value['trace_id'], '凭证编号'), 'direction': value['direction'],
-            'near_mm': near, 'far_mm': far,
-            'total_mdb': integer(value['total_mdb'], '实测总损耗', 0, MAX_LOSS), 'events': events}
+    result = {'trace_id': key(value['trace_id'], '凭证编号'), 'direction': value['direction'],
+              'near_mm': near, 'far_mm': far,
+              'total_mdb': integer(value['total_mdb'], '实测总损耗', 0, MAX_LOSS), 'events': events}
+    if marks:
+        result['marks_mm'] = marks
+    return result
