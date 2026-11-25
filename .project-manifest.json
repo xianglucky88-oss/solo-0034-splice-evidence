@@ -19,6 +19,13 @@
       ]
     },
     {
+      "id": "revocation",
+      "name": "校验批次撤销",
+      "paths": [
+        "splice/revocations.py"
+      ]
+    },
+    {
       "id": "plan",
       "name": "光段计划",
       "paths": [
@@ -312,6 +319,99 @@
       "success": "历史导出与冻结证据一致",
       "failure": "未签发修订返回未找到",
       "verification": "核对换用凭证后旧 CSV 的数值、来源和签发摘要"
+    },
+    {
+      "id": "revoke",
+      "name": "撤销校验批次",
+      "entry": "POST /api/splice/revocations",
+      "module_ids": [
+        "http",
+        "store",
+        "receipt",
+        "revocation",
+        "browser"
+      ],
+      "steps": [
+        "校验仪表编号与校验批次并登记撤销通知",
+        "重发同通知复用，异通知或异批次冲突",
+        "汇总跨光段的收件、在用修订和已签修订影响"
+      ],
+      "success": "按仪表与批次共同确定撤销范围",
+      "failure": "同一批次再次以不同通知撤销时冲突",
+      "verification": "同号异仪表批次可交接，同仪表异批次的签件只影响被撤销者"
+    },
+    {
+      "id": "retrace",
+      "name": "带校验资料的重传",
+      "entry": "POST /api/splice/spans/{span}/traces",
+      "module_ids": [
+        "http",
+        "store",
+        "receipt",
+        "revocation"
+      ],
+      "steps": [
+        "要求仪表与批次同时注明",
+        "按编号与规范内容比较重传"
+      ],
+      "success": "两项一致时复用原收件",
+      "failure": "只给一项或改动任一标识时拒绝",
+      "verification": "校验缺项、改写仪表、改写批次三种拒绝路径"
+    },
+    {
+      "id": "scope",
+      "name": "追溯撤销影响",
+      "entry": "GET /api/splice/revocations",
+      "module_ids": [
+        "store",
+        "revocation",
+        "release"
+      ],
+      "steps": [
+        "按实际引用区分未采用凭证、在用修订和已签修订",
+        "对已签修订按签发时的凭证引用判断"
+      ],
+      "success": "只列出实际引用被撤销批次的件",
+      "failure": "未采用凭证只出现在收件影响中",
+      "verification": "同光段两批次签件分别标记，另一仪表同号批次不受影响"
+    },
+    {
+      "id": "handoff",
+      "name": "留置与交接门禁",
+      "entry": "GET /api/splice/spans/{span}",
+      "module_ids": [
+        "receipt",
+        "selection",
+        "revocation",
+        "workspace",
+        "release"
+      ],
+      "steps": [
+        "在闭合核算后叠加撤销状态",
+        "受影响工作修订阻止签发",
+        "已签件标为现时不可交接"
+      ],
+      "success": "读数合格的受影响修订仍留置",
+      "failure": "撤销先生效时拒绝签发；旧收件来源未注明沿用原流程",
+      "verification": "校验合格读数被撤销留置、换凭证后放行以及旧收件不受影响"
+    },
+    {
+      "id": "concurrent",
+      "name": "撤销与签发并发",
+      "entry": "POST /api/splice/spans/{span}/releases",
+      "module_ids": [
+        "store",
+        "selection",
+        "revocation",
+        "release"
+      ],
+      "steps": [
+        "签发与撤销在同一写事务序列中裁决",
+        "签发后撤销则标记已签件，撤销后签发则拒绝"
+      ],
+      "success": "先签的受影响件可追到撤销通知",
+      "failure": "撤销先生效时不产生新签件",
+      "verification": "并发触发签发与撤销两种次序均能核对"
     }
   ],
   "complexity": {
@@ -355,6 +455,18 @@
       {
         "id": "frozen-export",
         "description": "CSV 使用指定签发版本，带双端引用和签发摘要"
+      },
+      {
+        "id": "calibration-revocation",
+        "description": "按仪表与批次共同登记撤销通知，重发复用、异通知冲突"
+      },
+      {
+        "id": "impact-tracing",
+        "description": "跨光段按实际引用区分未采用凭证、在用修订和已签修订"
+      },
+      {
+        "id": "handoff-hold",
+        "description": "受影响工作修订即使读数合格也留置，已签件按现时状态标记"
       }
     ]
   }

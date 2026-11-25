@@ -54,6 +54,26 @@
     {
       "workflow_id": "export",
       "command": "python3 -B -m tools.smoke --through export"
+    },
+    {
+      "workflow_id": "revoke",
+      "command": "python3 -B -m tools.revoke_smoke --through revoke"
+    },
+    {
+      "workflow_id": "retrace",
+      "command": "python3 -B -m tools.revoke_smoke --through retrace"
+    },
+    {
+      "workflow_id": "scope",
+      "command": "python3 -B -m tools.revoke_smoke --through scope"
+    },
+    {
+      "workflow_id": "handoff",
+      "command": "python3 -B -m tools.revoke_smoke --through handoff"
+    },
+    {
+      "workflow_id": "concurrent",
+      "command": "python3 -B -m tools.revoke_smoke --through concurrent"
     }
   ]
 }

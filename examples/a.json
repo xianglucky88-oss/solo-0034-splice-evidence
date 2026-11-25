@@ -1,5 +1,6 @@
 {
   "trace_id": "A-105", "direction": "a", "near_mm": 10000, "far_mm": 1610000, "total_mdb": 850,
+  "instrument_id": "OTDR-A", "calibration_batch": "CAL-2026-07",
   "events": [
     {"event_id": "A7", "at_mm": 373000, "loss_mdb": -30},
     {"event_id": "A9", "at_mm": 818000, "loss_mdb": 197},

@@ -47,6 +47,9 @@ export function setupIngest(submit) {
     error.textContent = '';
     byId('ingest-title').textContent = type === 'plan' ? '登记验收计划' : '导入仪表凭证';
     byId('sample-link').href = type === 'plan' ? '/examples/plan.json' : '/examples/a.json';
+    byId('sample-note').textContent = type === 'trace'
+      ? '凭证应同时注明仪表编号与校验批次；缺少时按来源未注明沿用原流程。'
+      : '';
     dialog.showModal();
     text.focus();
   };

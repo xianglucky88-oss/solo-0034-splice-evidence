@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS traces (
     direction TEXT NOT NULL CHECK (direction IN ('a', 'b')),
     digest TEXT NOT NULL,
     payload BLOB NOT NULL,
+    instrument_id TEXT,
+    calibration_batch TEXT,
     PRIMARY KEY (span_id, trace_id),
     UNIQUE (span_id, trace_id, direction)
 );
@@ -25,4 +27,12 @@ CREATE TABLE IF NOT EXISTS releases (
     digest TEXT NOT NULL,
     payload BLOB NOT NULL,
     PRIMARY KEY (span_id, revision)
+);
+CREATE TABLE IF NOT EXISTS revocations (
+    notice_id TEXT PRIMARY KEY,
+    instrument_id TEXT NOT NULL,
+    calibration_batch TEXT NOT NULL,
+    note TEXT,
+    revoked_at TEXT NOT NULL,
+    UNIQUE (instrument_id, calibration_batch)
 );

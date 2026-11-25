@@ -22,10 +22,13 @@ python3 -B -m splice --db ./example.sqlite3 --port 8740
 2. 查看「双端里程对照」，点击 J01 的 A7，核对原始第 1 行、仪表里程 373 米、统一里程 363 米和有符号损耗 −0.030 dB。J01 的双向损耗为 0.045 dB。
 3. 点击「签发当前修订」，打开签发记录中的 JSON 或接续点 CSV。每个版本保留签发时的损耗和两端凭证引用。
 4. 返回当前修订，将乙端凭证切换到 B-204 并签发新修订。在签发记录中比较两次签发的点位与链路差值。
+5. 点击「撤销校验批次」，输入 `OTDR-A` 与 `CAL-2026-07`（样例见 `examples/revoke.json`）。修订 1 使用该批次的甲端凭证，会在签发清单与详情标为「现时不可交接」，原凭证、历史结论和 CSV 仍可追到撤销通知；改用 B-204（批次 `CAL-2026-09`）后，后续修订继续可交接。
 
 ```bash
 # 临时 SQLite 中的 HTTP 演示验收，完成后清理数据
 python3 -B -m tools.smoke
+# 校验批次撤销对交接、签发与导出的影响
+python3 -B -m tools.revoke_smoke
 # 源码语法及 DDL 检查，需要 Node.js 命令行
 python3 -B -m tools.check_source
 ```

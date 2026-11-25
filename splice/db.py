@@ -11,6 +11,10 @@ class Database:
         with self.connect() as connection:
             connection.execute('PRAGMA journal_mode = WAL')
             connection.executescript(Path(__file__).with_name('schema.sql').read_text(encoding='utf-8'))
+            columns = {row['name'] for row in connection.execute('PRAGMA table_info(traces)')}
+            for name in ('instrument_id', 'calibration_batch'):
+                if name not in columns:
+                    connection.execute(f'ALTER TABLE traces ADD COLUMN {name} TEXT')
 
     @contextmanager
     def connect(self):

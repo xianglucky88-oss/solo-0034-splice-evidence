@@ -31,11 +31,13 @@
         </div>
         <div class="heading-actions">
           <span id="release-status" class="status"></span>
+          <button id="revoke" type="button">撤销校验批次</button>
           <button id="import-trace" type="button">导入仪表凭证</button>
           <button id="issue" type="button" class="primary">签发当前修订</button>
         </div>
       </section>
       <section class="metrics" aria-label="光段损耗核算" id="metrics"></section>
+      <p id="handoff" class="muted handoff"></p>
       <div class="workgrid">
         <section class="panel alignment">
           <header class="panel-head"><div><h2>双端里程对照</h2><p id="revision-note" class="muted"></p></div>
@@ -51,12 +53,20 @@
         </section>
         <aside class="desk-side">
           <section class="panel">
-            <header class="panel-head"><div><h2>采用凭证</h2><p class="muted">每端采用一份仪表凭证</p></div></header>
+            <header class="panel-head"><h2>采用凭证</h2><p class="muted">每端采用一份仪表凭证</p></header>
             <form id="selection" class="form-stack">
               <label id="label-a">甲端<select id="pick-a"></select></label>
               <label id="label-b">乙端<select id="pick-b"></select></label>
               <button id="apply" type="submit">更新采用凭证</button>
             </form>
+            <p id="adopted-hint" class="muted scope-note"></p>
+            <dl class="detail" id="adopted-source"></dl>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><h2>撤销通知</h2><p class="muted">按仪表与校验批次共同确定</p></header>
+            <p id="revocation-current" class="muted scope-note"></p>
+            <div id="revocations" class="releases"></div>
+            <div id="revocation-scope" class="releases scope"></div>
           </section>
           <section class="panel" id="review-panel" hidden>
             <header class="panel-head"><h2>事件证据</h2><button id="close-evidence" type="button">关闭</button></header>
@@ -78,11 +88,22 @@
   </main>
   <dialog id="ingest">
     <form id="ingest-form" class="form-stack">
-      <header><h2 id="ingest-title"></h2><p><a id="sample-link" target="_blank" rel="noopener">打开数据样例</a></p></header>
+      <header><h2 id="ingest-title"></h2><p><a id="sample-link" target="_blank" rel="noopener">打开数据样例</a></p><p id="sample-note" class="muted"></p></header>
       <label>选择 JSON 文件<input id="file" type="file" accept=".json,application/json"></label>
       <label>或粘贴 JSON<textarea id="json" rows="10" spellcheck="false" required></textarea></label>
       <p id="ingest-error" role="alert" class="error"></p>
       <div class="dialog-actions"><button id="cancel" type="button">取消</button><button class="primary" type="submit">提交资料</button></div>
+    </form>
+  </dialog>
+  <dialog id="revocation">
+    <form id="revocation-form" class="form-stack">
+      <header><h2>撤销校验批次</h2><p class="muted">仪表编号与校验批次共同确定范围；撤销后受影响工作修订与已签件现时不可交接，原凭证与历史结论保留。</p></header>
+      <label>仪表编号<input id="revocation-instrument" name="instrument_id" required maxlength="48" spellcheck="false"></label>
+      <label>校验批次<input name="calibration_batch" required maxlength="48" spellcheck="false"></label>
+      <label>撤销通知编号（可选）<input name="notice_id" maxlength="48" spellcheck="false"></label>
+      <label>说明（可选）<input name="note" maxlength="80"></label>
+      <p id="revocation-error" role="alert" class="error"></p>
+      <div class="dialog-actions"><button id="revocation-cancel" type="button">取消</button><button class="primary" type="submit">生效并核对影响</button></div>
     </form>
   </dialog>
 </body>

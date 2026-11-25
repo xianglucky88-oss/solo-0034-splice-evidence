@@ -3,10 +3,16 @@ from .plan import MAX_DISTANCE, MAX_LOSS
 from .values import fields, integer, key, rows
 
 DIRECTIONS = ('a', 'b')
+CALIBRATION_FIELDS = ('instrument_id', 'calibration_batch')
 
 
 def trace_from(value):
-    fields(value, 'trace_id', 'direction', 'near_mm', 'far_mm', 'total_mdb', 'events')
+    fields(value, 'trace_id', 'direction', 'near_mm', 'far_mm', 'total_mdb', 'events',
+           optional=CALIBRATION_FIELDS)
+    instrument = value.get('instrument_id')
+    batch = value.get('calibration_batch')
+    if (instrument is None) != (batch is None):
+        raise Problem('仪表编号与校验批次必须同时注明')
     near = integer(value['near_mm'], '近端标记', 0, MAX_DISTANCE - 1)
     far = integer(value['far_mm'], '远端标记', near + 1, MAX_DISTANCE)
     if value['direction'] not in DIRECTIONS:
@@ -23,6 +29,10 @@ def trace_from(value):
             'event_id': event_id, 'at_mm': integer(row['at_mm'], '仪表里程', 0, MAX_DISTANCE),
             'loss_mdb': integer(row['loss_mdb'], '有符号事件损耗', -MAX_LOSS, MAX_LOSS),
         })
-    return {'trace_id': key(value['trace_id'], '凭证编号'), 'direction': value['direction'],
-            'near_mm': near, 'far_mm': far,
-            'total_mdb': integer(value['total_mdb'], '实测总损耗', 0, MAX_LOSS), 'events': events}
+    trace = {'trace_id': key(value['trace_id'], '凭证编号'), 'direction': value['direction'],
+             'near_mm': near, 'far_mm': far,
+             'total_mdb': integer(value['total_mdb'], '实测总损耗', 0, MAX_LOSS), 'events': events}
+    if instrument is not None:
+        trace['instrument_id'] = key(instrument, '仪表编号')
+        trace['calibration_batch'] = key(batch, '校验批次')
+    return trace

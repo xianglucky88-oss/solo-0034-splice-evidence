@@ -6,6 +6,7 @@ from .errors import Problem
 from .exports import site_csv
 from .receipts import get_trace, list_traces, receive
 from .releases import get_release, issue, list_releases
+from .revocations import get_notice, list_notices, revoke
 from .selection import select
 from .spans import create_span, list_spans
 from .workbench import event_evidence, workspace
@@ -14,6 +15,7 @@ SPAN = r'/spans/(?P<span>[A-Za-z0-9][A-Za-z0-9_.-]{0,47})'
 TRACE = r'(?P<trace>[A-Za-z0-9][A-Za-z0-9_.-]{0,47})'
 EVENT = r'(?P<event>[A-Za-z0-9][A-Za-z0-9_.-]{0,47})'
 REVISION = r'(?P<revision>[0-9]{1,16})'
+NOTICE = r'(?P<notice>[A-Za-z0-9][A-Za-z0-9_.-]{0,47})'
 
 
 @dataclass(frozen=True)
@@ -27,8 +29,8 @@ def _evidence(connection, span, trace, event):
 
 
 def _archived_evidence(connection, span, revision, trace, event):
-    snapshot = get_release(connection, span, int(revision))['snapshot']
-    return event_evidence(snapshot, trace, event)
+    release = get_release(connection, span, int(revision))
+    return event_evidence({**release['snapshot'], 'handoff': release['handoff']}, trace, event)
 
 
 def _csv(connection, span, revision):
@@ -47,12 +49,15 @@ READ = (
     (SPAN + r'/releases/' + REVISION + '/evidence/' + TRACE + '/' + EVENT, _archived_evidence),
     (SPAN + r'/compare/(?P<left>[0-9]{1,16})/(?P<right>[0-9]{1,16})',
      lambda db, span, left, right: compare(db, span, int(left), int(right))),
+    (r'/revocations', list_notices),
+    (r'/revocations/' + NOTICE, get_notice),
 )
 WRITE = (
     (r'/spans', create_span),
     (SPAN + r'/traces', receive),
     (SPAN + r'/selection', select),
     (SPAN + r'/releases', issue),
+    (r'/revocations', revoke),
 )
 
 

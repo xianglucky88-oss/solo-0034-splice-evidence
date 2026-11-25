@@ -74,6 +74,18 @@ textarea { padding: .65rem; resize: vertical; font-family: ui-monospace, monospa
 .releases, .changes { padding: .1rem 1.15rem .85rem; overflow-wrap: anywhere; }
 .release-item { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .65rem; border-top: 1px solid var(--stroke); }
 .release-item a { font-size: .77rem; }
+.release-title { font-weight: 700; }
+.release-item small { flex-basis: 100%; }
+.release-item small.error, .revocation-item small.error, .muted.error { color: var(--warn); }
+.revocation-item { display: grid; gap: .18rem; border-top: 1px solid var(--stroke); padding: .55rem 0; }
+.revocation-item p { font-size: .86rem; }
+.revocation-item small { color: var(--muted); font-size: .76rem; }
+.scope-note { padding: 0 1.15rem .6rem; }
+.scope { padding-top: 0; }
+.detail.nested { padding: 0 0 .4rem; }
+.handoff { margin-bottom: .95rem; }
+.exceptions .error, .detail .error { color: var(--warn); }
+.status.warn + small, .release-item .status { flex-shrink: 0; }
 .compare { border-top: 1px solid var(--stroke); padding-top: .7rem; }
 .detail { margin: 0; padding: 0 1.15rem .95rem; display: grid; grid-template-columns: minmax(70px, auto) 1fr; gap: .4rem .5rem; font-size: .84rem; }
 .detail dt { color: var(--muted); }

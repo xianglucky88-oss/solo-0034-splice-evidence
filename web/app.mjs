@@ -3,6 +3,7 @@ import { get, post, postText, spanPath, spans } from './api.mjs';
 import { loadDemo } from './demo.mjs';
 import { byId, options } from './dom.mjs';
 import { setupIngest } from './ingest.mjs';
+import { setupRevocation, renderRevocationImpact } from './revocation.mjs';
 import { renderChanges, renderReleases } from './release-list.mjs';
 import { ruler } from './ruler.mjs';
 import { renderEvidence, renderSites } from './site-table.mjs';
@@ -43,21 +44,25 @@ async function evidence(event) {
 async function show(id, archived = null) {
   const version = ++state.version;
   const base = spanPath(id);
-  const detail = archived == null ? get(base) : get(`${base}/releases/${archived}`).then((result) => result.snapshot);
-  const [work, receipts, releases] = await Promise.all([detail, get(`${base}/traces`), get(`${base}/releases`)]);
-  if (state.version !== version) return;
-  Object.assign(state, { id, archived, revision: work.revision });
+  const detail = archived == null
+    ? get(base)
+    : get(`${base}/releases/${archived}`).then((result) => ({ ...result.snapshot, handoff: result.handoff }));
+  const [work, receipts, releases, notices] = await Promise.all([
+    detail, get(`${base}/traces`), get(`${base}/releases`), get('/api/splice/revocations')]);  if (state.version !== version) return;
+  Object.assign(state, { id, archived, revision: work.revision, work });
   byId('span').value = id;
   byId('empty').hidden = true;
   byId('workspace').hidden = false;
   byId('live').hidden = archived == null;
   byId('import-trace').disabled = archived != null;
+  byId('revoke').disabled = archived != null;
   byId('issue').disabled = archived != null || work.budget.status !== 'ready';
   byId('review-panel').hidden = true;
   renderSummary(work, archived != null);
   renderSites(work, evidence);
   renderAdoption(work, receipts, archived != null);
   renderReleases(base, releases, (revision) => guarded(() => show(id, revision)));
+  renderRevocationImpact(work, notices, id);
   draw(work);
 }
 
@@ -78,8 +83,16 @@ const openIngest = setupIngest(async (type, text) => {
     const id = state.id;
     const saved = await postText(`${spanPath(id)}/traces`, text);
     await show(id);
-    flash(saved.replayed ? '该凭证已在收件档案中' : '凭证已收件，可在右侧采用');
+    const note = saved.source?.source === 'unstated' ? '未注明仪表与校验批次，按来源未注明沿用原流程' : '可在右侧采用';
+    flash(saved.replayed ? '该凭证已在收件档案中' : `凭证已收件，${note}`);
   }
+});
+
+const openRevocation = setupRevocation(async (payload) => {
+  const saved = await post('/api/splice/revocations', payload);
+  await show(state.id);
+  const affected = saved.impacts;
+  flash(`撤销通知 ${saved.notice_id} 已${saved.replayed ? '在册' : '生效'} · ${affected.releases.length} 个签发件、${affected.receipts.length} 份收件受影响`);
 });
 
 byId('new-plan').addEventListener('click', () => { if (!state.pending) openIngest('plan'); });
@@ -94,6 +107,7 @@ byId('demo').addEventListener('click', () => guarded(async () => {
   await refreshSpans(await loadDemo());
   flash('演示资料已入库');
 }));
+byId('revoke').addEventListener('click', () => { if (!state.pending) openRevocation(); });
 byId('live').addEventListener('click', () => guarded(() => show(state.id)));
 byId('close-evidence').addEventListener('click', () => { state.evidence++; byId('review-panel').hidden = true; });
 byId('selection').addEventListener('submit', (event) => {

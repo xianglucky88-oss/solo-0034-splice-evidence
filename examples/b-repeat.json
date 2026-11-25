@@ -1,5 +1,6 @@
 {
   "trace_id": "B-204", "direction": "b", "near_mm": 20500, "far_mm": 1622500, "total_mdb": 910,
+  "instrument_id": "OTDR-B", "calibration_batch": "CAL-2026-09",
   "events": [
     {"event_id": "B3", "at_mm": 351000, "loss_mdb": 173},
     {"event_id": "B7", "at_mm": 812000, "loss_mdb": 131},
