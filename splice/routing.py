@@ -6,6 +6,9 @@ from .errors import Problem
 from .exports import site_csv
 from .receipts import get_trace, list_traces, receive
 from .releases import get_release, issue, list_releases
+from .route_exports import route_csv
+from .routes import (create_route, get_route_release, issue_route, list_route_releases, list_routes,
+                     route_workspace)
 from .selection import select
 from .spans import create_span, list_spans
 from .workbench import event_evidence, workspace
@@ -14,6 +17,8 @@ SPAN = r'/spans/(?P<span>[A-Za-z0-9][A-Za-z0-9_.-]{0,47})'
 TRACE = r'(?P<trace>[A-Za-z0-9][A-Za-z0-9_.-]{0,47})'
 EVENT = r'(?P<event>[A-Za-z0-9][A-Za-z0-9_.-]{0,47})'
 REVISION = r'(?P<revision>[0-9]{1,16})'
+ROUTE = r'/routes/(?P<route>[A-Za-z0-9][A-Za-z0-9_.-]{0,47})'
+SHA = r'(?P<sha>[0-9a-f]{64})'
 
 
 @dataclass(frozen=True)
@@ -35,6 +40,10 @@ def _csv(connection, span, revision):
     return Download(site_csv(get_release(connection, span, int(revision))), f'{span}-r{revision}-sites.csv')
 
 
+def _route_csv(connection, route, sha):
+    return Download(route_csv(get_route_release(connection, route, sha)), f'{route}-{sha[:12]}.csv')
+
+
 READ = (
     (r'/spans', list_spans),
     (SPAN, workspace),
@@ -47,12 +56,19 @@ READ = (
     (SPAN + r'/releases/' + REVISION + '/evidence/' + TRACE + '/' + EVENT, _archived_evidence),
     (SPAN + r'/compare/(?P<left>[0-9]{1,16})/(?P<right>[0-9]{1,16})',
      lambda db, span, left, right: compare(db, span, int(left), int(right))),
+    (r'/routes', list_routes),
+    (ROUTE, route_workspace),
+    (ROUTE + r'/releases', list_route_releases),
+    (ROUTE + r'/releases/' + SHA, get_route_release),
+    (ROUTE + r'/releases/' + SHA + r'/parts.csv', _route_csv),
 )
 WRITE = (
     (r'/spans', create_span),
     (SPAN + r'/traces', receive),
     (SPAN + r'/selection', select),
     (SPAN + r'/releases', issue),
+    (r'/routes', create_route),
+    (ROUTE + r'/releases', issue_route),
 )
 
 

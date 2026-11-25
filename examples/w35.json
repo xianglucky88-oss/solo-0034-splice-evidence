@@ -1,0 +1,7 @@
+{
+  "span_id": "FX-W35", "label": "河东机房引入段", "a_label": "河西接续箱", "b_label": "河东机房",
+  "length_mm": 800000, "fixed_mdb": 300, "link_limit_mdb": 1000, "residual_limit_mdb": 60,
+  "sites": [
+    {"site_id": "J04", "at_mm": 300000, "window_mm": 8000, "limit_mdb": 180}
+  ]
+}

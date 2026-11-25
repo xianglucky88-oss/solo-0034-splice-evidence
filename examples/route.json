@@ -1,0 +1,72 @@
+{
+  "route_id": "FX-R1",
+  "label": "北岸至河东整路",
+  "start": {
+    "box": "桥北机柜",
+    "port": "ODF-1"
+  },
+  "end": {
+    "box": "河东机房",
+    "port": "ODF-7"
+  },
+  "link_limit_mdb": 1300,
+  "residual_limit_mdb": 60,
+  "segments": [
+    {
+      "span_id": "FX-W34",
+      "revision": 1,
+      "entry": {
+        "box": "桥北机柜",
+        "port": "ODF-1"
+      },
+      "exit": {
+        "box": "河西接续箱",
+        "port": "端口1"
+      },
+      "orientation": "forward"
+    },
+    {
+      "span_id": "FX-W35",
+      "revision": 1,
+      "entry": {
+        "box": "河西接续箱",
+        "port": "端口2"
+      },
+      "exit": {
+        "box": "河东机房",
+        "port": "ODF-7"
+      },
+      "orientation": "forward"
+    }
+  ],
+  "bridges": [
+    {
+      "from": {
+        "box": "河西接续箱",
+        "port": "端口1"
+      },
+      "to": {
+        "box": "河西接续箱",
+        "port": "端口2"
+      },
+      "gap_mm": 1500,
+      "forward_mdb": 8,
+      "backward_mdb": 9,
+      "estimate_mdb": 8
+    },
+    {
+      "from": {
+        "box": "河西接续箱",
+        "port": "端口2"
+      },
+      "to": {
+        "box": "河西接续箱",
+        "port": "端口1"
+      },
+      "gap_mm": 1500,
+      "forward_mdb": 9,
+      "backward_mdb": 8,
+      "estimate_mdb": 8
+    }
+  ]
+}

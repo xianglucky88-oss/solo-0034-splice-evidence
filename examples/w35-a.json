@@ -1,0 +1,6 @@
+{
+  "trace_id": "A-301", "direction": "a", "near_mm": 8000, "far_mm": 808000, "total_mdb": 350,
+  "events": [
+    {"event_id": "A21", "at_mm": 300000, "loss_mdb": 55}
+  ]
+}

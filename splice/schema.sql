@@ -26,3 +26,14 @@ CREATE TABLE IF NOT EXISTS releases (
     payload BLOB NOT NULL,
     PRIMARY KEY (span_id, revision)
 );
+CREATE TABLE IF NOT EXISTS routes (
+    route_id TEXT PRIMARY KEY,
+    plan BLOB NOT NULL
+);
+CREATE TABLE IF NOT EXISTS route_releases (
+    route_id TEXT NOT NULL REFERENCES routes(route_id),
+    digest TEXT NOT NULL,
+    sequence INTEGER NOT NULL,
+    payload BLOB NOT NULL,
+    PRIMARY KEY (route_id, digest)
+);

@@ -54,6 +54,14 @@
     {
       "workflow_id": "export",
       "command": "python3 -B -m tools.smoke --through export"
+    },
+    {
+      "workflow_id": "route",
+      "command": "python3 -B -m tools.smoke --through route"
+    },
+    {
+      "workflow_id": "acceptance",
+      "command": "python3 -B -m tools.smoke --through route"
     }
   ]
 }

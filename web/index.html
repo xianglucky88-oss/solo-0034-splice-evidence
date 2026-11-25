@@ -12,8 +12,10 @@
     <div class="brand"><span class="brand-mark" aria-hidden="true">纤</span><span>纤证<span class="brand-detail">接续损耗交接台</span></span></div>
     <div class="header-actions">
       <label class="span-control">光段 <select id="span" aria-label="选择光段"></select></label>
+      <label class="span-control">整路 <select id="route" aria-label="选择整路"></select></label>
       <button id="demo" type="button">导入演示</button>
       <button id="new-plan" type="button">登记光段</button>
+      <button id="new-route" type="button">登记整路</button>
     </div>
   </header>
   <main>
@@ -71,6 +73,48 @@
               <button type="submit">比较版本</button>
             </form>
             <div id="changes" class="changes" hidden aria-live="polite"></div>
+          </section>
+        </aside>
+      </div>
+    </div>
+    <div id="route-workspace" hidden>
+      <section class="heading">
+        <div>
+          <p id="route-code" class="eyebrow"></p>
+          <h1 id="route-title"></h1>
+          <p id="route-endpoints" class="muted"></p>
+        </div>
+        <div class="heading-actions">
+          <span id="route-status" class="status"></span>
+          <button id="return-live" type="button" hidden>返回整路核算</button>
+          <button id="accept-route" type="button" class="primary">验收整路</button>
+        </div>
+      </section>
+      <section class="metrics" aria-label="整路损耗核算" id="route-metrics"></section>
+      <div class="workgrid">
+        <section class="panel">
+          <header class="panel-head"><div><h2>分段拼接</h2><p id="route-note" class="muted"></p></div></header>
+          <div class="scroll"><table>
+            <caption class="sr">分段引用与各向实测</caption>
+            <thead><tr><th>次序</th><th>光段</th><th>朝向</th><th>整路里程</th><th>正向实测</th><th>反向实测</th><th>估算</th><th>所引修订</th></tr></thead>
+            <tbody id="segment-rows"></tbody>
+          </table></div>
+          <div class="scroll"><table>
+            <caption class="sr">相邻段之间的桥接</caption>
+            <thead><tr><th>次序</th><th>实物端口</th><th>整路里程</th><th>参考面间距</th><th>正向实测</th><th>反向实测</th><th>估算</th></tr></thead>
+            <tbody id="bridge-rows"></tbody>
+          </table></div>
+          <div class="scroll"><table>
+            <caption class="sr">整路接续点</caption>
+            <thead><tr><th>点位 / 整路里程</th><th>甲向凭证</th><th>乙向凭证</th><th>双向均值</th><th>限值</th><th>结论</th></tr></thead>
+            <tbody id="route-site-rows"></tbody>
+          </table></div>
+          <div id="route-exceptions" class="exceptions" hidden></div>
+        </section>
+        <aside class="desk-side">
+          <section class="panel">
+            <header class="panel-head"><h2>整路验收记录</h2></header>
+            <div id="route-releases" class="releases"></div>
           </section>
         </aside>
       </div>

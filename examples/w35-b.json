@@ -1,0 +1,14 @@
+{
+  "trace_id": "B-302",
+  "direction": "b",
+  "near_mm": 12000,
+  "far_mm": 812000,
+  "total_mdb": 366,
+  "events": [
+    {
+      "event_id": "B12",
+      "at_mm": 512000,
+      "loss_mdb": 61
+    }
+  ]
+}

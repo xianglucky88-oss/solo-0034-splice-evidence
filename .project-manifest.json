@@ -71,6 +71,15 @@
       ]
     },
     {
+      "id": "route",
+      "name": "整路拼装与验收",
+      "paths": [
+        "splice/ports.py",
+        "splice/whole_route.py",
+        "splice/routes.py"
+      ]
+    },
+    {
       "id": "workspace",
       "name": "工作台投影与证据回查",
       "paths": [
@@ -97,7 +106,8 @@
       "id": "export",
       "name": "签发件导出",
       "paths": [
-        "splice/exports.py"
+        "splice/exports.py",
+        "splice/route_exports.py"
       ]
     },
     {
@@ -105,6 +115,7 @@
       "name": "原生浏览器工作台",
       "paths": [
         "web/app.mjs",
+        "web/route.mjs",
         "web/index.html"
       ]
     }
@@ -312,6 +323,44 @@
       "success": "历史导出与冻结证据一致",
       "failure": "未签发修订返回未找到",
       "verification": "核对换用凭证后旧 CSV 的数值、来源和签发摘要"
+    },
+    {
+      "id": "route",
+      "name": "拼接整路路由",
+      "entry": "POST /api/splice/routes",
+      "module_ids": [
+        "http",
+        "store",
+        "route",
+        "release",
+        "browser"
+      ],
+      "steps": [
+        "校验起终端口、各段已签修订和桥接记录",
+        "按实物端口检查每段恰用一次且次序唯一"
+      ],
+      "success": "整路返回分段、桥接与整路核算",
+      "failure": "缺桥接、端口不明、记录冲突或拼法不唯一时留置",
+      "verification": "同名接续箱按箱体加端口区分，重复桥接只计一次"
+    },
+    {
+      "id": "acceptance",
+      "name": "整路验收与冻结",
+      "entry": "POST /api/splice/routes/{route}/releases",
+      "module_ids": [
+        "http",
+        "store",
+        "route",
+        "release",
+        "export"
+      ],
+      "steps": [
+        "合计各向实测、全路估算并核对整路限值",
+        "通过后按摘要冻结整路快照与分段导出"
+      ],
+      "success": "相同拼装重复验收返回同一快照",
+      "failure": "实测均值、估算或闭合差越界时拒绝验收",
+      "verification": "限值等号通过，整路 CSV 与快照一致"
     }
   ],
   "complexity": {
@@ -343,6 +392,22 @@
       {
         "id": "evidence-projection",
         "description": "事件来源与账面投影在同一修订视图内关联"
+      },
+      {
+        "id": "port-identity",
+        "description": "同名接续箱以箱体与端口共同确定实物身份"
+      },
+      {
+        "id": "unique-assembly",
+        "description": "沿端口走出唯一链，每段恰用一次且次序唯一"
+      },
+      {
+        "id": "bridge-symmetry",
+        "description": "同一实物连接的对称重记只计一次，异内容留置"
+      },
+      {
+        "id": "reversed-segment",
+        "description": "反向段翻转点序、证据方向与里程累计"
       },
       {
         "id": "immutable-release",

@@ -45,8 +45,10 @@ export function setupIngest(submit) {
     kind = type;
     form.reset();
     error.textContent = '';
-    byId('ingest-title').textContent = type === 'plan' ? '登记验收计划' : '导入仪表凭证';
-    byId('sample-link').href = type === 'plan' ? '/examples/plan.json' : '/examples/a.json';
+    const titles = { plan: '登记验收计划', trace: '导入仪表凭证', route: '登记整路拼装计划' };
+    const samples = { plan: '/examples/plan.json', trace: '/examples/a.json', route: '/examples/route.json' };
+    byId('ingest-title').textContent = titles[type];
+    byId('sample-link').href = samples[type];
     dialog.showModal();
     text.focus();
   };

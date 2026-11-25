@@ -10,6 +10,8 @@ async function request(path, payload) {
 
 export const spans = '/api/splice/spans';
 export const spanPath = (id) => `${spans}/${encodeURIComponent(id)}`;
+export const routes = '/api/splice/routes';
+export const routePath = (id) => `${routes}/${encodeURIComponent(id)}`;
 export const get = (path) => request(path);
 export const post = (path, data) => request(path, JSON.stringify(data));
 export const postText = (path, text) => request(path, text);
