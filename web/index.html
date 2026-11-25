@@ -28,6 +28,7 @@
           <p id="span-code" class="eyebrow"></p>
           <h1 id="title"></h1>
           <p id="endpoints" class="muted"></p>
+          <p id="tier-note" class="muted"></p>
         </div>
         <div class="heading-actions">
           <span id="release-status" class="status"></span>
@@ -44,7 +45,7 @@
           <canvas id="ruler" role="img" aria-label="统一里程上的接续点与双端测量位置，测量详情见下方证据表"></canvas>
           <div class="scroll"><table>
             <caption class="sr">接续点证据</caption>
-            <thead><tr><th>点位 / 里程</th><th>甲端凭证</th><th>乙端凭证</th><th>双向均值</th><th>限值</th><th>结论</th></tr></thead>
+            <thead><tr><th>点位 / 里程</th><th>甲端凭证</th><th>乙端凭证</th><th>双向均值</th><th>档位限值</th><th>结论</th></tr></thead>
             <tbody id="site-rows"></tbody>
           </table></div>
           <div id="exceptions" class="exceptions" hidden></div>
@@ -58,6 +59,15 @@
               <button id="apply" type="submit">更新采用凭证</button>
             </form>
           </section>
+          <section class="panel">
+            <header class="panel-head"><div><h2>限值档</h2><p class="muted">按两端实测日期唯一命中</p></div></header>
+            <div class="form-stack">
+              <label>甲端实测日期<input id="date-a" type="date"></label>
+              <label>乙端实测日期<input id="date-b" type="date"></label>
+              <button id="apply-dates" type="button">更订实测日期</button>
+            </div>
+            <div id="tiers" class="releases"></div>
+          </section>
           <section class="panel" id="review-panel" hidden>
             <header class="panel-head"><h2>事件证据</h2><button id="close-evidence" type="button">关闭</button></header>
             <dl class="detail" id="evidence"></dl>
@@ -69,6 +79,10 @@
               <label>原版本<select id="from"></select></label>
               <label>新版本<select id="to"></select></label>
               <button type="submit">比较版本</button>
+            </form>
+            <form id="rejudge" class="form-stack compare" hidden>
+              <label>按原件档位重判<select id="rejudge-tier"></select></label>
+              <button type="submit">复核两件</button>
             </form>
             <div id="changes" class="changes" hidden aria-live="polite"></div>
           </section>

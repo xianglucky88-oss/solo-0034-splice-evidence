@@ -1,4 +1,5 @@
 from .errors import Problem
+from .limits import describe
 from .projection import evaluate
 from .selection import selected
 from .spans import find_span
@@ -10,7 +11,7 @@ def workspace(connection, span_id):
     traces = [item['trace'] for item in slots.values() if item]
     metadata = {side: {'trace_id': item['trace']['trace_id'], 'digest': item['digest']} if item else None
                 for side, item in slots.items()}
-    return evaluate(span, metadata, traces)
+    return evaluate(span, metadata, traces, describe(connection, span_id))
 
 
 def event_evidence(result, trace_id, event_id):

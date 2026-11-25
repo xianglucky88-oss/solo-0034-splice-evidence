@@ -2,6 +2,11 @@ import { byId, options } from './dom.mjs';
 
 export function renderAdoption(work, receipts, archived) {
   byId('apply').disabled = archived;
+  byId('apply-dates').disabled = archived || work.tier.status === 'disabled';
+  byId('date-a').value = work.tier.measured_on.a || '';
+  byId('date-b').value = work.tier.measured_on.b || '';
+  byId('date-a').disabled = archived;
+  byId('date-b').disabled = archived;
   for (const side of ['a', 'b']) {
     byId(`label-${side}`).firstChild.textContent = work.plan[`${side}_label`];
     const select = byId(`pick-${side}`);

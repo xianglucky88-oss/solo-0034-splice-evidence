@@ -57,7 +57,8 @@ class Handler(BaseHTTPRequestHandler):
                 raise Problem('请求来源与工作台地址不一致', 403)
             path = urlsplit(self.path).path
             if path.startswith('/api/splice/') or read_body:
-                result = dispatch(self.server.database, path, read_body)
+                query = urlsplit(self.path).query
+                result = dispatch(self.server.database, path, read_body, query)
                 if isinstance(result, Download):
                     self.answer(200, result.data, 'text/csv', result.filename)
                 else:

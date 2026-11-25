@@ -15,10 +15,13 @@ export function renderSites(work, openEvidence) {
     const point = node('td', site.site_id);
     point.append(node('small', meter(site.at_mm)));
     const status = node('td');
-    const label = { pass: '通过', over: '超限', incomplete: '待补证' }[site.status];
+    const label = { pass: '通过', over: '超限', incomplete: '待补证', unrated: '未判限值' }[site.status];
     status.append(node('span', label, `status ${site.status === 'pass' ? 'good' : 'warn'}`));
+    const limit = node('td', loss(2 * site.limit_mdb));
+    const planLimit = site.plan_limit_mdb ?? site.limit_mdb;
+    if (site.limit_mdb !== planLimit) limit.append(node('small', `计划 ${loss(2 * planLimit)}`));
     row.append(point, observationCell(site.observations.a, openEvidence), observationCell(site.observations.b, openEvidence),
-      node('td', loss(site.mean_x2_mdb)), node('td', loss(2 * site.limit_mdb)), status);
+      node('td', loss(site.mean_x2_mdb)), limit, status);
     return row;
   }));
   const exceptions = byId('exceptions');

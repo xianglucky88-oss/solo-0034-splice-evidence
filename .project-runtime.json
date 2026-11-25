@@ -40,6 +40,10 @@
       "command": "python3 -B -m tools.smoke --through closure"
     },
     {
+      "workflow_id": "limits",
+      "command": "python3 -B -m tools.tiers"
+    },
+    {
       "workflow_id": "evidence",
       "command": "python3 -B -m tools.smoke --through evidence"
     },

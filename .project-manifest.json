@@ -49,6 +49,13 @@
       ]
     },
     {
+      "id": "limits",
+      "name": "限值档登记与选档",
+      "paths": [
+        "splice/limits.py"
+      ]
+    },
+    {
       "id": "matching",
       "name": "窗口归点与冲突判定",
       "paths": [
@@ -239,6 +246,27 @@
       "verification": "模拟测量总值升高并确认拒签"
     },
     {
+      "id": "limits",
+      "name": "登记限值档并按日期选档",
+      "entry": "POST /api/splice/spans/{span}/limits",
+      "module_ids": [
+        "http",
+        "store",
+        "plan",
+        "limits",
+        "workspace",
+        "browser"
+      ],
+      "steps": [
+        "校验档位起止日、点位/整段/闭合限值与版本",
+        "遇到同内容重传复用，否则追加档案版本",
+        "按两端实测日期唯一选档"
+      ],
+      "success": "同一档覆盖两端实测日期时按该档限值验收",
+      "failure": "缺日期、空档、重叠或跨档按方向报告并留置",
+      "verification": "核对起日含、止日不含及四种异常的方向说明"
+    },
+    {
       "id": "evidence",
       "name": "回查原始事件",
       "entry": "GET /api/splice/spans/{span}/evidence/{trace}/{event}",
@@ -341,6 +369,10 @@
         "description": "以独立实测量核对估算量、链路限值与闭合差"
       },
       {
+        "id": "dated-limit-tiers",
+        "description": "档位按起止日划分，版本只增不改；未启用档位的光段照旧"
+      },
+      {
         "id": "evidence-projection",
         "description": "事件来源与账面投影在同一修订视图内关联"
       },
@@ -355,6 +387,14 @@
       {
         "id": "frozen-export",
         "description": "CSV 使用指定签发版本，带双端引用和签发摘要"
+      },
+      {
+        "id": "directional-tier-resolution",
+        "description": "两端实测日期唯一命中同一档，异常按方向列出"
+      },
+      {
+        "id": "cross-tier-rejudge",
+        "description": "比较分列测量与限值变化，可按原件档位重判并保留原结论"
       }
     ]
   }

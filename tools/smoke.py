@@ -56,7 +56,7 @@ def check(base, through):
         return
 
     assert write('/selection', {'revision': 0, 'a': a['trace_id'], 'b': None})['revision'] == 1
-    assert write('/releases', {'revision': 1}, 409)['error']
+    assert write('/releases', {'revision': 1, 'archive': 0}, 409)['error']
     assert write('/selection', {'revision': 1, 'a': b['trace_id'], 'b': None}, 422)['error']
     selection = {'revision': 1, 'a': a['trace_id'], 'b': b['trace_id']}
     assert write('/selection', selection)['revision'] == 2
@@ -99,7 +99,7 @@ def check(base, through):
     write('/traces', heavy)
     assert write('/selection', {**selection, 'revision': 2, 'b': heavy['trace_id']})['revision'] == 3
     assert get()['budget']['blockers'] == ['closure_over_limit']
-    assert write('/releases', {'revision': 3}, 409)['error']
+    assert write('/releases', {'revision': 3, 'archive': 0}, 409)['error']
     assert write('/selection', {**selection, 'revision': 3})['revision'] == 4
     if steps[through] < steps['evidence']:
         return
@@ -110,14 +110,14 @@ def check(base, through):
     if steps[through] < steps['issue']:
         return
 
-    first = write('/releases', {'revision': 4})
-    assert first == write('/releases', {'revision': 4})
+    first = write('/releases', {'revision': 4, 'archive': 0})
+    assert first == write('/releases', {'revision': 4, 'archive': 0})
     assert first['digest'] == digest(pack(first['snapshot']))
     if steps[through] < steps['compare']:
         return
 
     assert write('/selection', {**selection, 'revision': 4, 'b': repeat['trace_id']})['revision'] == 5
-    latest = write('/releases', {'revision': 5})
+    latest = write('/releases', {'revision': 5, 'archive': 0})
     comparison = get('/compare/4/5')
     assert [row['delta_x2_mdb'] for row in comparison['sites']] == [12, -14, -5]
     assert comparison['before']['residual_x2_mdb'] == 103 and comparison['after']['residual_x2_mdb'] == 115

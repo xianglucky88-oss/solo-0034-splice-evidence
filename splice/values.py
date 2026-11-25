@@ -1,8 +1,10 @@
 import re
+from datetime import date as calendar_date
 
 from .errors import Problem
 
 KEY = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,47}', re.ASCII)
+DAY = re.compile(r'[0-9]{4}-[0-9]{2}-[0-9]{2}', re.ASCII)
 
 
 def key(value, field):
@@ -33,3 +35,12 @@ def rows(value, field, low, high):
     if not isinstance(value, list) or not low <= len(value) <= high:
         raise Problem(f'{field} 必须含 {low} 至 {high} 行')
     return value
+
+
+def day(value, field):
+    if not isinstance(value, str) or not DAY.fullmatch(value):
+        raise Problem(f'{field} 必须为 YYYY-MM-DD 格式的日期')
+    try:
+        return calendar_date.fromisoformat(value).isoformat()
+    except ValueError as exc:
+        raise Problem(f'{field} 不是有效日期') from exc

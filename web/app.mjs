@@ -7,9 +7,11 @@ import { renderChanges, renderReleases } from './release-list.mjs';
 import { ruler } from './ruler.mjs';
 import { renderEvidence, renderSites } from './site-table.mjs';
 import { renderSummary } from './summary.mjs';
+import { renderRejudge, renderRejudgeOptions, renderTiers } from './tiers.mjs';
 
 const draw = ruler(byId('ruler'));
-const state = { id: null, revision: null, archived: null, version: 0, evidence: 0, compare: 0, pending: false };
+const state = { id: null, revision: null, archived: null, version: 0, evidence: 0, compare: 0,
+  archive: null, dates: {}, pending: false };
 
 function flash(message, error = false) {
   byId('flash').textContent = message;
@@ -44,9 +46,13 @@ async function show(id, archived = null) {
   const version = ++state.version;
   const base = spanPath(id);
   const detail = archived == null ? get(base) : get(`${base}/releases/${archived}`).then((result) => result.snapshot);
-  const [work, receipts, releases] = await Promise.all([detail, get(`${base}/traces`), get(`${base}/releases`)]);
+  const [work, receipts, releases, limits] = await Promise.all(
+    [detail, get(`${base}/traces`), get(`${base}/releases`), get(`${base}/limits`)]);
   if (state.version !== version) return;
-  Object.assign(state, { id, archived, revision: work.revision });
+  // 旧签件可能早于限值档字段，按禁用档位补一个只读视图。
+  if (!work.tier) work.tier = { status: 'disabled', registry_version: 0, stamp: 0, tier_id: null,
+    tier: null, measured_on: {}, problems: [] };
+  Object.assign(state, { id, archived, revision: work.revision, archive: limits, dates: work.tier.measured_on });
   byId('span').value = id;
   byId('empty').hidden = true;
   byId('workspace').hidden = false;
@@ -55,6 +61,7 @@ async function show(id, archived = null) {
   byId('issue').disabled = archived != null || work.budget.status !== 'ready';
   byId('review-panel').hidden = true;
   renderSummary(work, archived != null);
+  renderTiers(work, limits, archived != null);
   renderSites(work, evidence);
   renderAdoption(work, receipts, archived != null);
   renderReleases(base, releases, (revision) => guarded(() => show(id, revision)));
@@ -107,9 +114,23 @@ byId('selection').addEventListener('submit', (event) => {
 });
 byId('issue').addEventListener('click', () => guarded(async () => {
   const id = state.id;
-  const result = await post(`${spanPath(id)}/releases`, { revision: state.revision });
+  const result = await post(`${spanPath(id)}/releases`,
+    { revision: state.revision, archive: state.archive?.describe?.stamp ?? 0 });
   await show(id, result.snapshot.revision);
   flash('当前修订已签发');
+}));
+byId('apply-dates').addEventListener('click', () => guarded(async () => {
+  const id = state.id;
+  const known = state.dates || {};
+  for (const side of ['a', 'b']) {
+    const trace = byId(`pick-${side}`).value;
+    const value = byId(`date-${side}`).value || null;
+    if (trace && value && value !== known[side]) {
+      await post(`${spanPath(id)}/traces/${encodeURIComponent(trace)}/measured_on`, { measured_on: value });
+    }
+  }
+  await show(id);
+  flash('实测日期已更订');
 }));
 byId('comparison').addEventListener('submit', async (event) => {
   event.preventDefault();
@@ -117,7 +138,23 @@ byId('comparison').addEventListener('submit', async (event) => {
   const index = ++state.compare;
   try {
     const changes = await get(`${spanPath(id)}/compare/${byId('from').value}/${byId('to').value}`);
-    if (state.version === version && state.compare === index) renderChanges(changes);
+    if (state.version === version && state.compare === index) {
+      renderChanges(changes);
+      renderRejudgeOptions(changes.rejudge_options);
+    }
+  } catch (issue) {
+    if (state.version === version && state.compare === index) flash(issue.message, true);
+  }
+});
+byId('rejudge').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const { id, version } = state;
+  const index = ++state.compare;
+  const [archive, tierId] = byId('rejudge-tier').value.split(':');
+  try {
+    const result = await get(`${spanPath(id)}/compare/${byId('from').value}/${byId('to').value}`
+      + `?archive=${encodeURIComponent(archive)}&tier=${encodeURIComponent(tierId)}`);
+    if (state.version === version && state.compare === index) renderRejudge(result.rejudge);
   } catch (issue) {
     if (state.version === version && state.compare === index) flash(issue.message, true);
   }
