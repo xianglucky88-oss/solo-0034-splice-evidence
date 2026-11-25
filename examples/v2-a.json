@@ -1,0 +1,10 @@
+{
+  "trace_id": "A-V2-101", "direction": "a", "near_mm": 10000, "far_mm": 1610000, "total_mdb": 820,
+  "events": [
+    {"event_id": "VA1", "at_mm": 373000, "loss_mdb": 40},
+    {"event_id": "VA2", "at_mm": 710000, "loss_mdb": 70},
+    {"event_id": "VA3", "at_mm": 910000, "loss_mdb": 60},
+    {"event_id": "VA4", "at_mm": 1283000, "loss_mdb": 90},
+    {"event_id": "VA5", "at_mm": 1460000, "loss_mdb": 50}
+  ]
+}

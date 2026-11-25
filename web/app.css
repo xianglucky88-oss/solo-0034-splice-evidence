@@ -72,6 +72,14 @@ td small { display: block; color: var(--muted); margin-top: .22rem; }
 .form-stack select, textarea { width: 100%; }
 textarea { padding: .65rem; resize: vertical; font-family: ui-monospace, monospace; }
 .releases, .changes { padding: .1rem 1.15rem .85rem; overflow-wrap: anywhere; }
+.relations { border-top: 1px solid var(--stroke); padding: .7rem 1.15rem .9rem; }
+.relations ul { margin: .45rem 0 0; padding-left: 1.1rem; display: grid; gap: .4rem; font-size: .85rem; }
+.relations .status { margin-right: .4rem; }
+.version-note { padding: 0 1.15rem .6rem; font-weight: 650; }
+#reconcile-result { padding-top: .85rem; overflow-x: auto; }
+#reconcile-result table { font-size: .8rem; }
+#reconcile-form select + select { margin-top: .4rem; }
+.release-item .status { font-weight: 600; background: #eef4ef; }
 .release-item { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .65rem; border-top: 1px solid var(--stroke); }
 .release-item a { font-size: .77rem; }
 .compare { border-top: 1px solid var(--stroke); padding-top: .7rem; }

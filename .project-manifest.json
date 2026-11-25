@@ -101,10 +101,35 @@
       ]
     },
     {
+      "id": "relations",
+      "name": "拆并换版关系",
+      "paths": [
+        "splice/relations.py",
+        "splice/plan_versions.py"
+      ]
+    },
+    {
+      "id": "version-workbench",
+      "name": "版本扫测与签发",
+      "paths": [
+        "splice/version_receipts.py",
+        "splice/version_selection.py",
+        "splice/version_workbench.py"
+      ]
+    },
+    {
+      "id": "reconcile",
+      "name": "跨版关系对账",
+      "paths": [
+        "splice/reconcile.py"
+      ]
+    },
+    {
       "id": "browser",
       "name": "原生浏览器工作台",
       "paths": [
         "web/app.mjs",
+        "web/versions.mjs",
         "web/index.html"
       ]
     }
@@ -312,6 +337,60 @@
       "success": "历史导出与冻结证据一致",
       "failure": "未签发修订返回未找到",
       "verification": "核对换用凭证后旧 CSV 的数值、来源和签发摘要"
+    },
+    {
+      "id": "activate",
+      "name": "启用拆并换版计划",
+      "entry": "POST /api/splice/spans/{span}/versions",
+      "module_ids": [
+        "http",
+        "store",
+        "relations",
+        "version-workbench",
+        "browser"
+      ],
+      "steps": [
+        "校验计划依据、完整新点位与逐点工程关系",
+        "确认两版每点恰归一项且沿用原判限后登记新版本"
+      ],
+      "success": "新版本挂到当前版本之后并推进一次修订",
+      "failure": "依据过期、漏项、冲突或改判限时拒收，原计划与采用照旧",
+      "verification": "过期修订、漏项、重复归项和改判限均被拒绝"
+    },
+    {
+      "id": "version-isolation",
+      "name": "版本扫测隔离与签发",
+      "entry": "POST /api/splice/spans/{span}/versions/{version}/traces",
+      "module_ids": [
+        "http",
+        "store",
+        "version-workbench"
+      ],
+      "steps": [
+        "按版本收件并拒绝任何迟到旧扫测",
+        "版本内独立采用双端凭证并通过闭合门禁后签发"
+      ],
+      "success": "新版仅用本版双向扫测，旧签件按原摘要读回",
+      "failure": "迟到旧扫测、错方向采用和留置修订被拒",
+      "verification": "拒收首版扫测、校验重传复用与版本独立签发"
+    },
+    {
+      "id": "reconcile",
+      "name": "按工程关系跨版对账",
+      "entry": "GET /api/splice/spans/{span}/reconcile/{lv}/{lr}/{rv}/{rr}",
+      "module_ids": [
+        "http",
+        "store",
+        "relations",
+        "reconcile"
+      ],
+      "steps": [
+        "读取两件签件并沿确认关系构建点位连通组",
+        "每件点位各计一次，汇总两侧损耗、差额与变更链"
+      ],
+      "success": "拆并组与单侧组完整覆盖两版点位，同号不自动对齐",
+      "failure": "反向对账、缺签件或关系证据不完整时拒绝",
+      "verification": "核对拆分、合并、复用退役和一支退役四类场景的分组"
     }
   ],
   "complexity": {
@@ -355,6 +434,18 @@
       {
         "id": "frozen-export",
         "description": "CSV 使用指定签发版本，带双端引用和签发摘要"
+      },
+      {
+        "id": "relation-partition",
+        "description": "拆并沿用新增退役关系把两版点位各自完整划分，每点恰归一项"
+      },
+      {
+        "id": "version-scan-isolation",
+        "description": "各版独立收件扫测，迟到旧扫测跨版拒收，采用与签发按版本隔离"
+      },
+      {
+        "id": "relationship-grouping",
+        "description": "以并查集沿确认关系连通点位，跨版对账按组各计一次，同号不自动对齐"
       }
     ]
   }

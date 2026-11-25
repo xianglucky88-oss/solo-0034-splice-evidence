@@ -1,0 +1,22 @@
+{
+  "plan_version": 2,
+  "note": "北岸桥改线：J02 拆分为 J02A/J02B，新增 J04，无关新点复用 J02 后退役由独立光段演示",
+  "plan": {
+    "span_id": "FX-W34", "label": "北岸桥引入段（改线第二版）", "a_label": "桥北机柜", "b_label": "河西接续箱",
+    "length_mm": 1600000, "fixed_mdb": 480, "link_limit_mdb": 1260, "residual_limit_mdb": 80,
+    "sites": [
+      {"site_id": "J01", "at_mm": 360000, "window_mm": 8000, "limit_mdb": 160},
+      {"site_id": "J02A", "at_mm": 700000, "window_mm": 8000, "limit_mdb": 120},
+      {"site_id": "J02B", "at_mm": 900000, "window_mm": 8000, "limit_mdb": 120},
+      {"site_id": "J03", "at_mm": 1270000, "window_mm": 9000, "limit_mdb": 180},
+      {"site_id": "J04", "at_mm": 1450000, "window_mm": 8000, "limit_mdb": 150}
+    ]
+  },
+  "basis": "北岸桥改线设计变更单 BG-2026-017 及现场确认的拆并沿用关系表",
+  "relations": [
+    {"relation": "continue", "from_sites": ["J01"], "to_sites": ["J01"]},
+    {"relation": "split", "from_sites": ["J02"], "to_sites": ["J02A", "J02B"]},
+    {"relation": "continue", "from_sites": ["J03"], "to_sites": ["J03"]},
+    {"relation": "added", "from_sites": [], "to_sites": ["J04"]}
+  ]
+}

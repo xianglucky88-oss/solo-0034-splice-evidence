@@ -1,0 +1,22 @@
+{
+  "plan_version": 3,
+  "note": "两支在 J02M 再次合并：J02A/J02B 合并为 J02M，J04 退役，其余沿用",
+  "plan": {
+    "span_id": "FX-W34", "label": "北岸桥引入段（合流第三版）", "a_label": "桥北机柜", "b_label": "河西接续箱",
+    "length_mm": 1600000, "fixed_mdb": 480, "link_limit_mdb": 1260, "residual_limit_mdb": 80,
+    "sites": [
+      {"site_id": "J01", "at_mm": 360000, "window_mm": 8000, "limit_mdb": 160},
+      {"site_id": "J02M", "at_mm": 805000, "window_mm": 9000, "limit_mdb": 200},
+      {"site_id": "J03", "at_mm": 1270000, "window_mm": 9000, "limit_mdb": 180},
+      {"site_id": "J05", "at_mm": 1500000, "window_mm": 8000, "limit_mdb": 150}
+    ]
+  },
+  "basis": "北岸桥合流设计变更单 BG-2026-026 及现场确认的合并、退役、新增关系表",
+  "relations": [
+    {"relation": "continue", "from_sites": ["J01"], "to_sites": ["J01"]},
+    {"relation": "merge", "from_sites": ["J02A", "J02B"], "to_sites": ["J02M"]},
+    {"relation": "continue", "from_sites": ["J03"], "to_sites": ["J03"]},
+    {"relation": "retired", "from_sites": ["J04"], "to_sites": []},
+    {"relation": "added", "from_sites": [], "to_sites": ["J05"]}
+  ]
+}

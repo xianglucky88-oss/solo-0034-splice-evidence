@@ -40,6 +40,7 @@
         <section class="panel alignment">
           <header class="panel-head"><div><h2>双端里程对照</h2><p id="revision-note" class="muted"></p></div>
             <button id="live" type="button" hidden>返回当前修订</button></header>
+          <p id="version-note" class="muted version-note"></p>
           <div class="legend" aria-hidden="true"><span>设计接续点</span><span>甲端事件</span><span>乙端事件</span></div>
           <canvas id="ruler" role="img" aria-label="统一里程上的接续点与双端测量位置，测量详情见下方证据表"></canvas>
           <div class="scroll"><table>
@@ -50,6 +51,10 @@
           <div id="exceptions" class="exceptions" hidden></div>
         </section>
         <aside class="desk-side">
+          <section class="panel" id="version-panel" hidden>
+            <div id="versions"></div>
+            <div id="version-relations" class="relations" hidden></div>
+          </section>
           <section class="panel">
             <header class="panel-head"><div><h2>采用凭证</h2><p class="muted">每端采用一份仪表凭证</p></div></header>
             <form id="selection" class="form-stack">
@@ -71,6 +76,16 @@
               <button type="submit">比较版本</button>
             </form>
             <div id="changes" class="changes" hidden aria-live="polite"></div>
+          </section>
+          <section class="panel" id="reconcile-panel" hidden>
+            <header class="panel-head"><div><h2>跨版对账</h2>
+              <p class="muted">按确认的拆并关系分组，每件点位各计一次</p></div></header>
+            <form id="reconcile-form" class="form-stack compare">
+              <label>本版（签件）<select id="reconcile-left-version"></select><select id="reconcile-left-revision"></select></label>
+              <label>对方（签件）<select id="reconcile-right-version"></select><select id="reconcile-right-revision"></select></label>
+              <button type="submit">按工程关系对账</button>
+            </form>
+            <div id="reconcile-result" class="changes" hidden aria-live="polite"></div>
           </section>
         </aside>
       </div>

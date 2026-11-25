@@ -54,6 +54,18 @@
     {
       "workflow_id": "export",
       "command": "python3 -B -m tools.smoke --through export"
+    },
+    {
+      "workflow_id": "activate",
+      "command": "python3 -B -m tools.smoke_versions --through activate"
+    },
+    {
+      "workflow_id": "version-isolation",
+      "command": "python3 -B -m tools.smoke_versions --through isolation"
+    },
+    {
+      "workflow_id": "reconcile",
+      "command": "python3 -B -m tools.smoke_versions --through reconcile"
     }
   ]
 }

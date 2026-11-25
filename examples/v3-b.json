@@ -1,0 +1,9 @@
+{
+  "trace_id": "B-V3-201", "direction": "b", "near_mm": 21000, "far_mm": 1621000, "total_mdb": 790,
+  "events": [
+    {"event_id": "WB1", "at_mm": 1261000, "loss_mdb": 145},
+    {"event_id": "WB2", "at_mm": 816000, "loss_mdb": 140},
+    {"event_id": "WB3", "at_mm": 350000, "loss_mdb": 55},
+    {"event_id": "WB4", "at_mm": 121000, "loss_mdb": 50}
+  ]
+}
